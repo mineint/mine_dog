@@ -57,8 +57,13 @@ Tangair_usb2can::Tangair_usb2can()
     //can 测试线程
     _CAN_TX_test_thread = std::thread(&Tangair_usb2can::CAN_TX_test_thread, this);
 
-    //键盘输入线程
-    _keyborad_input = std::thread(&Tangair_usb2can::keyborad_input, this);
+    int max_priority = sched_get_priority_max(SCHED_FIFO);
+    int min_priority = sched_get_priority_min(SCHED_FIFO);
+
+/*     set_thread_priority(_CAN_RX_device_0_thread, 30);  // 设置为优先级30
+    set_thread_priority(_CAN_RX_device_1_thread, 30);  // 设置为优先级50
+    set_thread_priority(_CAN_TX_test_thread, max_priority);      // 设置为优先级70 */
+    
 }
 
 /// @brief 析构函数
@@ -293,124 +298,65 @@ void Tangair_usb2can::CAN_RX_device_1_thread()
 // can发送测试线程函数
 void Tangair_usb2can::CAN_TX_test_thread()
 {
+
     //发送计数
     uint32_t tx_count = 0;
-    //键盘输入速度
-    speed_input = 2;
-    //电机控制参数配置，单纯给速度
-    {
-        
-        USB2CAN0_CAN_Bus_1.ID_1_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_1.ID_1_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_1.ID_1_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_1.ID_1_motor_send.kd = 20;
+   
+ 
+    
 
-        USB2CAN0_CAN_Bus_1.ID_2_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_1.ID_2_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_1.ID_2_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_1.ID_2_motor_send.kd = 20;
+    sleep(1);
 
-        USB2CAN0_CAN_Bus_1.ID_3_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_1.ID_3_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_1.ID_3_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_1.ID_3_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_1.ID_3_motor_send.kd = 20;
+    ZERO_ALL_MOTOR(500);
 
-        USB2CAN0_CAN_Bus_2.ID_1_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_2.ID_1_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_2.ID_1_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_2.ID_1_motor_send.kd = 20;
 
-        USB2CAN0_CAN_Bus_2.ID_2_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_2.ID_2_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_2.ID_2_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_2.ID_2_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_2.ID_2_motor_send.kd = 20;
-
-        USB2CAN0_CAN_Bus_2.ID_3_motor_send.position = 0;
-        USB2CAN0_CAN_Bus_2.ID_3_motor_send.speed = 2;
-        USB2CAN0_CAN_Bus_2.ID_3_motor_send.torque = 0;
-        USB2CAN0_CAN_Bus_2.ID_3_motor_send.kp = 0;
-        USB2CAN0_CAN_Bus_2.ID_3_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_1.ID_1_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_1.ID_1_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_1.ID_1_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_1.ID_1_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_1.ID_1_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_1.ID_2_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_1.ID_2_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_1.ID_2_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_1.ID_2_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_1.ID_2_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_1.ID_3_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_1.ID_3_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_1.ID_3_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_1.ID_3_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_1.ID_3_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_2.ID_1_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_2.ID_1_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_2.ID_1_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_2.ID_1_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_2.ID_2_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_2.ID_2_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_2.ID_2_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_2.ID_2_motor_send.kd = 20;
-
-        USB2CAN1_CAN_Bus_2.ID_3_motor_send.position = 0;
-        USB2CAN1_CAN_Bus_2.ID_3_motor_send.speed = 2;
-        USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque = 0;
-        USB2CAN1_CAN_Bus_2.ID_3_motor_send.kp = 0;
-        USB2CAN1_CAN_Bus_2.ID_3_motor_send.kd = 20;
-    }
    
     //使能所有电机
     ENABLE_ALL_MOTOR(100);
+     
+    
 
+
+    //USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -1;
     while (running_)
     {
-        //电机控制参数配置，单纯给速度，给ID为1的电机，设置键盘速度，速度单位为rad/s
-        if (abs((int)speed_input) < 50)
-        {
-            USB2CAN0_CAN_Bus_1.ID_1_motor_send.speed = (int)speed_input;
-            USB2CAN0_CAN_Bus_2.ID_1_motor_send.speed = (int)speed_input;
-            USB2CAN1_CAN_Bus_1.ID_1_motor_send.speed = (int)speed_input;
-            USB2CAN1_CAN_Bus_2.ID_1_motor_send.speed = (int)speed_input;
-            
-        }
+        
+       
 
         // CAN发送,发送频率为1000hz,实际间隔约为950us
         CAN_TX_ALL_MOTOR(75);
-            
+        
 
-        // CAN发送计数
         tx_count++;
-      
-    
+
+        
+
         std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tpMill =
             std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
         time_t tp = tpMill.time_since_epoch().count();
 
-        // 打印数据tp时间ms，1000hz的控制频率的话，1s一次，
-        if (tx_count % 1000 == 0)
+        
+
+       if (tx_count % 1000 == 0)
         {
-            std::cout << std::endl
-                      << "USB2CAN0_CAN1.current_speed_f=  " << USB2CAN0_CAN_Bus_1.ID_1_motor_recieve.current_speed_f << "  rad/s" << std::endl
-                      << "USB2CAN0_CAN2.current_speed_f=  " << USB2CAN0_CAN_Bus_2.ID_1_motor_recieve.current_speed_f << "  rad/s" << std::endl
-                      << "USB2CAN1_CAN1.current_speed_f=  " << USB2CAN1_CAN_Bus_1.ID_1_motor_recieve.current_speed_f << "  rad/s" << std::endl
-                      << "USB2CAN1_CAN2.current_speed_f=  " << USB2CAN1_CAN_Bus_2.ID_1_motor_recieve.current_speed_f << "  rad/s" << std::endl;
+             /* std::cout << std::endl
+                      << "Leg 1.current=  " << USB2CAN0_CAN_Bus_1.ID_1_motor_recieve.current_torque << std::endl
+                      << "Leg 2.current=  " << USB2CAN0_CAN_Bus_1.ID_2_motor_recieve.current_torque << std::endl
+                      << "Leg 3.current=  " << USB2CAN0_CAN_Bus_1.ID_3_motor_recieve.current_torque << std::endl
+                      << "Leg 4.current=  " << USB2CAN0_CAN_Bus_2.ID_1_motor_recieve.current_torque << std::endl
+                      << "Leg 5.current=  " << USB2CAN0_CAN_Bus_2.ID_2_motor_recieve.current_torque << std::endl
+                      << "Leg 6.current=  " << USB2CAN0_CAN_Bus_2.ID_3_motor_recieve.current_torque << std::endl
+                      << "Leg 7.current=  " << USB2CAN1_CAN_Bus_1.ID_1_motor_recieve.current_torque << std::endl
+                      << "Leg 8.current=  " << USB2CAN1_CAN_Bus_1.ID_2_motor_recieve.current_torque << std::endl 
+                      << "Leg 9.current=  " << USB2CAN1_CAN_Bus_1.ID_3_motor_recieve.current_torque << std::endl
+                      << "Leg10.current=  " << USB2CAN1_CAN_Bus_2.ID_1_motor_recieve.current_torque << std::endl
+                      << "Leg11.current=  " << USB2CAN1_CAN_Bus_2.ID_2_motor_recieve.current_torque << std::endl
+                      << "Leg12.current=  " << USB2CAN1_CAN_Bus_2.ID_3_motor_recieve.current_torque << std::endl;
             std::cout << "can_tx_count=" << tx_count << "     " << "can_dev0_rx_count=" << can_dev0_rx_count << "     "<< "can_dev1_rx_count=" << can_dev1_rx_count << "     "
-                      << "TIME=" << (tp % 1000000) / 1000 << "." << tp % 1000 << "s" << std::endl;
-        }
+                      << "TIME=" << (tp % 1000000) / 1000 << "." << tp % 1000 << "s" << std::endl; */ 
+        } 
+
+        
     }
 
     //程序终止时的提示信息
@@ -424,12 +370,12 @@ void Tangair_usb2can::CAN_TX_test_thread()
 void Tangair_usb2can::keyborad_input()
 {
 
-    while (running_)
+    /* while (running_)
     {
         std::cin >> speed_input;
         std::cout << "speed_input=" << speed_input << std::endl;
     }
-    std::cout << "keyborad_input_thread  Exit~~" << std::endl;
+    std::cout << "keyborad_input_thread  Exit~~" << std::endl; */
 }
 
 /*****************************************************************************************************/

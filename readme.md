@@ -29,28 +29,14 @@ https://pan.baidu.com/s/1EwYDNQ0jMKyTSvJEEcj6aw?pwd=10ob
 https://e.tb.cn/h.TAnAHUN38QORoTB?tk=zZ92eKjIaTxHU591
 
 
-
-# 安装
-1. 克隆仓库到本地 :
-```bash
-git clone https://github.com/SOULDE-Studio/USB2CAN-Demo-Lingzu.git
-```
-2. 进入项目目录 :
-```bash
-cd USB2CAN-Demo-Lingzu
-```
-3. 编译项目 :
-```bash
 mkdir build
+cmake -S . -B build
 cd build
-cmake ..
-make
-```
-4. 运行项目 :
-```bash
-./can_code
-```
+make   （cmake --build build）
+                 cd /home/mine/USB2CAN-Demo-Lingzu/build
+./can_node
 
+sudo setcap 'cap_sys_nice=eip' ./can_node
 
 # 注意事项
 1. 本程序使用的两个USB2CAN模块其设备名称分别为USB2CAN0、USB2CAN1
@@ -90,4 +76,20 @@ Please cite the following if you use this code or parts of it:
 }
 ```
 
+sudo usermod -a -G dialout $USER
 
+关键步骤： 执行完后，你必须注销当前用户并重新登录（或者直接重启电脑），修改才会生效。
+
+重新登录后，输入 groups 命令，如果你能在列表中看到 dialout，说明权限已获得。此时直接运行你的程序即可。
+
+
+先确认你的设备路径（假设是 /dev/ttyUSB0）。
+
+执行：
+code Bash
+
+sudo chmod 666 /dev/ttyUSB0
+
+注：666 表示允许所有用户读写该设备。
+
+缺点： 一旦你拔掉 USB 再插上，或者重启电脑，权限会重置，你得重新运行这个命令。

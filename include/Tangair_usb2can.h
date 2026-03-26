@@ -22,18 +22,17 @@
 float uint_to_float(int x_int, float x_min, float x_max, int bits);
 int float_to_uint(float x, float x_min, float x_max, int bits);
 
-// 灵足电机,此处为RS04参数，其他电机请自行修改或参考电机调试工具上显示的参数
-//https://can.robotsfan.com/motor/robstride/desktop.html
+// 灵足电机,此处为RS02
 #define P_MIN -12.5f
 #define P_MAX 12.5f
-#define V_MIN -15.0f
-#define V_MAX 15.0f
+#define V_MIN -44.0f
+#define V_MAX 44.0f
 #define KP_MIN 0.0f
-#define KP_MAX 5000.0f
+#define KP_MAX 500.0f
 #define KD_MIN 0.0f
-#define KD_MAX 100.0f
-#define T_MIN -120.0f
-#define T_MAX 120.0f
+#define KD_MAX 5.0f
+#define T_MIN -17.0f
+#define T_MAX 17.0f
 
 
 

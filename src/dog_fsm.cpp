@@ -1,0 +1,274 @@
+#include "dog_fsm.h"
+#include "state_passive.h"   
+#include "state_stand.h"
+#include "state_trot.h"
+#include "Tangair_usb2can.h"
+#include "leg_controller.h"
+#include "gait_scheduler.h"
+
+// 采用单腿局部坐标系一致性，向外为正
+
+// 电机方向修正
+const float abad_side_sign[4] = {-1.f, 1.f, 1.f, -1.f};
+const float hip_side_sign[4] = {1.f, -1.f, 1.f, -1.f};
+const float knee_side_sign[4] = {1.f, -1.f, 1.f, -1.f}; 
+
+
+// 零点偏移参数
+const float abad_offset[4] = {0.4857f, 0.4857f, 0.4857f, 0.4857f};
+const float hip_offset[4] = {-0.9565f, -0.9565f, -0.9565f, -0.9565f};
+const float knee_offset[4] = {2.5144f, 2.5144f, 2.5144f, 2.5144f};
+
+
+
+
+FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
+    _data = std::make_unique<FSM_Data>();
+    _data->can_ptr = can;
+    _data->leg_controller = std::make_unique<LegController>();
+    _data->kinematics = std::make_unique<LegKinematics>(Eigen::Vector3f(0.096f, 0.21f, 0.21f));
+    _data->swing_controller = std::make_unique<LegSwingController>();
+    _data->gait_scheduler = std::make_unique<GaitScheduler>();
+    readerKey = new KeyboardReader();
+ 
+
+    // 初始化电机数据结构
+    for (int i = 0; i < 4; ++i) {
+        _data->leg_date[i] = Leg_Date();
+    }
+
+    _data->command = "passive";
+    //_data->gait_scheduler->current_gait_ = GaitType::TROT;
+    current_state_ = std::make_unique<State_Passive>(_data.get());
+}
+
+
+
+// 更新电机信息，并进行零点偏移
+void FSM::update_motor(FSM_Data* data, Tangair_usb2can* can_ptr) {
+   
+   USB2CAN_CAN_Bus_Struct Motor_recieve[4];
+
+    Motor_recieve[0] = can_ptr->USB2CAN0_CAN_Bus_1;
+    Motor_recieve[1] = can_ptr->USB2CAN0_CAN_Bus_2;
+    Motor_recieve[2] = can_ptr->USB2CAN1_CAN_Bus_1;
+    Motor_recieve[3] = can_ptr->USB2CAN1_CAN_Bus_2;
+    
+     for (int leg = 0; leg < 4; leg++) {
+        // q: 关节位置
+        _data->leg_date[leg].q(0) = Motor_recieve[leg].ID_1_motor_recieve.current_position_f * abad_side_sign[leg] + abad_offset[leg];
+        _data->leg_date[leg].q(1) = Motor_recieve[leg].ID_2_motor_recieve.current_position_f * hip_side_sign[leg] + hip_offset[leg];
+        _data->leg_date[leg].q(2) = Motor_recieve[leg].ID_3_motor_recieve.current_position_f * knee_side_sign[leg] + knee_offset[leg];
+        
+        // qd: 关节速度
+        _data->leg_date[leg].qd(0) = Motor_recieve[leg].ID_1_motor_recieve.current_speed_f * abad_side_sign[leg];
+        _data->leg_date[leg].qd(1) = Motor_recieve[leg].ID_2_motor_recieve.current_speed_f * hip_side_sign[leg];
+        _data->leg_date[leg].qd(2) = Motor_recieve[leg].ID_3_motor_recieve.current_speed_f * knee_side_sign[leg];
+    } 
+
+    // 电机限位保护
+    if (
+    _data->leg_date[0].q(0) > -1 && _data->leg_date[0].q(0) < 1.2 &&
+    _data->leg_date[0].q(1) > -1.5 && _data->leg_date[0].q(1) < 1.5 &&
+    _data->leg_date[0].q(2) > 1 && _data->leg_date[0].q(2) < 2.6 &&
+    _data->leg_date[1].q(0) > -1 && _data->leg_date[1].q(0) < 1.2 &&
+    _data->leg_date[1].q(1) > -1.5 && _data->leg_date[1].q(1) < 1.5 &&
+    _data->leg_date[1].q(2) > 1 && _data->leg_date[1].q(2) < 2.6 &&
+    _data->leg_date[2].q(0) > -1 && _data->leg_date[2].q(0) < 1.2 &&
+    _data->leg_date[2].q(1) > -1.5 && _data->leg_date[2].q(1) < 1.5 &&
+    _data->leg_date[2].q(2) > 1 && _data->leg_date[2].q(2) < 2.6 &&
+    _data->leg_date[3].q(0) > -1 && _data->leg_date[3].q(0) < 1.2 &&
+    _data->leg_date[3].q(1) > -1.5 && _data->leg_date[3].q(1) < 1.5 &&
+    _data->leg_date[3].q(2) > 1 && _data->leg_date[3].q(2) < 2.6
+        )
+        {
+
+            if (_data->tx_count % 200 == 0)
+            {
+            
+            /* std::cout << "正常" << std::endl;
+           std::cout << "position 1: " << _data->leg_date[0].qd(0) << std::endl;  
+           std::cout << "position 2: " << _data->leg_date[0].qd(1) << std::endl;
+           std::cout << "position 3: " << _data->leg_date[0].qd(2) << std::endl;
+           std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
+           std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
+           std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
+           std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
+           std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
+           std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
+           std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
+           std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
+           std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; */ 
+            }
+        }
+        else
+        {
+            _data->command = "passive";
+            _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
+            //_data->can_ptr->DISABLE_ALL_MOTOR(100); 
+
+            if (_data->tx_count % 200 == 0)
+            {         
+            std::cout << "危险：已进入被动状态！！！" << std::endl;
+           /* std::cout << "position 1: " << _data->leg_date[0].q(0) << std::endl; 
+           std::cout << "position 2: " << _data->leg_date[0].q(1) << std::endl;
+           std::cout << "position 3: " << _data->leg_date[0].q(2) << std::endl;
+           std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
+           std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
+           std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
+           std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
+           std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
+           std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
+           std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
+           std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
+           std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; */
+            }
+        }
+
+
+}
+
+
+void FSM::update(double dt) {
+    if (!_data || !_data.get() || !current_state_) {
+        std::cerr << "[FSM] update: invalid state or data\n";
+        return;
+    }
+
+    _data.get()->dt = dt;
+
+    char rc = readerKey->readKey();
+    
+
+    // 更新电机数据
+    update_motor(_data.get(), _data->can_ptr.get());
+
+    // 更新步态
+    _data.get()->gait_scheduler->update(dt);
+
+    // 执行当前状态的核心行为
+    current_state_->runState();
+
+    if(rc != 0) {
+    // 键盘按键到控制模式的映射
+    switch(rc) 
+    {
+      case 's':
+      case 'S':
+        _data->command = "stand";
+        std::cout << "切换到站立模式" << std::endl;
+        break;
+        
+      case 't':
+      case 'T':
+        _data->command = "trot";
+        std::cout << "切换到行走模式" << std::endl;
+        break;
+        
+      case 'p':
+      case 'P':
+      case ' ':
+        _data->command = "passive";
+        std::cout << "切换到被动模式" << std::endl;
+        break;
+      case 'd':
+      case 'D':
+        _data->start_high = -0.18;
+        std::cout << "已趴下:down" << std::endl;
+        break;
+    
+      case 'u':
+      case 'U':
+        _data->start_high = -0.28;
+        std::cout << "已起立:up" << std::endl;
+        break;
+
+      case 'r':
+      case 'R':
+        _data->trot_long_l = 0.05;
+        _data->trot_long_r = 0.05;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已跑步:run" << std::endl;
+        break;
+    
+      case 'x':
+      case 'X':
+        _data->trot_long_l = 0.00;
+        _data->trot_long_r = 0.00;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已踏步:step" << std::endl;
+        break;
+
+      case 'l':
+      case 'L':
+        _data->trot_long_l = 0.01;
+        _data->trot_long_r = 0.011;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已左转:" << std::endl;
+        break;
+    
+      case ';':
+      case ':':
+        _data->trot_long_l = 0.011;
+        _data->trot_long_r = 0.01;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已右转:" << std::endl;
+        break;
+
+      /* case 'n':
+      case 'N':
+        _data->trot_long_l = 0.00;
+        _data->trot_long_r = 0.00;
+        _data->trot_wide_l = 0.002;
+        _data->trot_wide_r = -0.002;
+        std::cout << "左平移:" << std::endl;
+        break;
+    
+      case 'm':
+      case 'M':
+        _data->trot_long_l = 0.00;
+        _data->trot_long_r = 0.00;
+        _data->trot_wide_l = -0.002;
+        _data->trot_wide_r = 0.002;
+        std::cout << "右平移:" << std::endl;
+        break; */
+        }
+    }
+
+    // 检查切换
+    FSM_StateName next_name = current_state_->checkTransition();
+    
+    
+    if (next_name != current_state_->currentStateName_) {
+        // 退出旧状态
+        current_state_->onExit();
+        std::cout <<  "已退出旧状态" << std::endl;
+        // 切换新状态
+        switch (next_name) {
+            case FSM_StateName::PASSIVE:
+                current_state_ = std::make_unique<State_Passive>(_data.get());
+                break;
+            case FSM_StateName::STAND:
+                current_state_ = std::make_unique<State_Stand>(_data.get());
+                break;
+            case FSM_StateName::TROT:
+                current_state_ = std::make_unique<State_Trot>(_data.get());
+                break;
+            
+        }
+
+        // 进入新状态
+        current_state_->onEnter();
+    }
+}
+
+
+
+
+void FSM::transitionTo(FSM_StateName next) {
+    
+}

@@ -1,0 +1,53 @@
+#pragma once
+
+#include "gait_scheduler.h"
+#include "leg_controller.h" 
+#include "leg_kinematics.h"
+#include "leg_swing.h"
+#include "dog_imu.h"
+#include "imu_driver.h"
+
+struct Leg_Date
+{
+    Eigen::Vector3d q;
+    Eigen::Vector3d qd;
+};
+
+
+struct FSM_Data {
+    double controlMode;      //控制模式
+    
+    std::string command;     //模式转换标志
+    double start_high = -0.06;
+    double trot_long = 0;
+    double trot_long_r = 0;
+    double trot_long_l = 0;
+    double trot_wide = 0;
+    double trot_wide_r = 0;
+    double trot_wide_l = 0;
+    std::unique_ptr<GaitScheduler> gait_scheduler;
+    std::unique_ptr<LegController> leg_controller;
+    std::unique_ptr<LegKinematics> kinematics;   
+    std::unique_ptr<LegSwingController> swing_controller;
+    Leg_Date leg_date[4];
+    LegController legs_filter[4];   //专门用于处理滤波
+    protocol_info_t imu_data;        //IMU数据
+    ImuDriver imu; 
+
+    std::shared_ptr<Tangair_usb2can> can_ptr;
+    std::vector<std::unique_ptr<LegController>> legs;
+    
+    double dt = 0.001;  // 控制周期
+    Eigen::Vector3d last_touchdown_pos[4];
+    Eigen::Vector3d next_foot_target[4];
+
+     
+    Eigen::Vector3d swing_kp{20, 24, 24};
+    Eigen::Vector3d swing_kd{1, 1.2, 1.2};
+
+    //Eigen::Vector3d swing_kp{3, 3, 3};
+    //Eigen::Vector3d swing_kd{0.15, 0.15, 0.15};
+
+    uint32_t tx_count = 0;
+  
+};
