@@ -38,8 +38,8 @@ public:
 }};
     
     // VMC相关系数
-    Eigen::Vector3d trot_kp{1250, 1250, 1500};
-    Eigen::Vector3d trot_kd{25, 25, 25}; 
+    Eigen::Vector3d trot_kp{1500, 1500, 2000};
+    Eigen::Vector3d trot_kd{30, 30, 30}; 
     Eigen::Vector3d stance_kp{1000, 1000, 1333};
     Eigen::Vector3d stance_kd{20, 20, 20};
     //Eigen::Vector3d stance_kp{50, 50, 50};

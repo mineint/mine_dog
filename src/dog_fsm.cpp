@@ -37,7 +37,7 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
         _data->leg_date[i] = Leg_Date();
     }
 
-    _data->command = "passive";
+    //_data->command = "passive";
     //_data->gait_scheduler->current_gait_ = GaitType::TROT;
     current_state_ = std::make_unique<State_Passive>(_data.get());
 }
@@ -174,6 +174,7 @@ void FSM::update(double dt) {
       case 'd':
       case 'D':
         _data->start_high = -0.18;
+        
         std::cout << "已趴下:down" << std::endl;
         break;
     
@@ -190,6 +191,24 @@ void FSM::update(double dt) {
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
         std::cout << "已跑步:run" << std::endl;
+        break;
+
+      case 'w':
+      case 'W':
+        _data->trot_long_l = 0.03;
+        _data->trot_long_r = 0.03;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已前进:ddd" << std::endl;
+        break;
+
+      case 'f':
+      case 'F':
+        _data->trot_long_l = -0.03;
+        _data->trot_long_r = -0.03;
+        _data->trot_wide_l = 0.00;
+        _data->trot_wide_r = 0.00;
+        std::cout << "已后退:fff" << std::endl;
         break;
     
       case 'x':
@@ -219,12 +238,12 @@ void FSM::update(double dt) {
         std::cout << "已右转:" << std::endl;
         break;
 
-      /* case 'n':
+      case 'n':
       case 'N':
         _data->trot_long_l = 0.00;
         _data->trot_long_r = 0.00;
-        _data->trot_wide_l = 0.002;
-        _data->trot_wide_r = -0.002;
+        _data->trot_wide_l = 0.0005;
+        _data->trot_wide_r = -0.0005;
         std::cout << "左平移:" << std::endl;
         break;
     
@@ -232,10 +251,10 @@ void FSM::update(double dt) {
       case 'M':
         _data->trot_long_l = 0.00;
         _data->trot_long_r = 0.00;
-        _data->trot_wide_l = -0.002;
-        _data->trot_wide_r = 0.002;
+        _data->trot_wide_l = -0.0005;
+        _data->trot_wide_r = 0.0005;
         std::cout << "右平移:" << std::endl;
-        break; */
+        break;
         }
     }
 
@@ -247,6 +266,7 @@ void FSM::update(double dt) {
         // 退出旧状态
         current_state_->onExit();
         std::cout <<  "已退出旧状态" << std::endl;
+        std::cout <<  "新状态:" << _data->command << std::endl;
         // 切换新状态
         switch (next_name) {
             case FSM_StateName::PASSIVE:

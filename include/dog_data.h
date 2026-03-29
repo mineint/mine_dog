@@ -15,9 +15,9 @@ struct Leg_Date
 
 
 struct FSM_Data {
-    double controlMode;      //控制模式
-    
-    std::string command;     //模式转换标志
+    double controlMode;      // 控制模式
+    double timer = 0;        // 站立计时
+    std::string command;     // 模式转换标志
     double start_high = -0.06;
     double trot_long = 0;
     double trot_long_r = 0;

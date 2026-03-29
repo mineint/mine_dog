@@ -8,6 +8,16 @@
 
 LegSwingController::LegSwingController(const Eigen::Vector3f& leg_lengths) {
     kinematics_ = std::make_unique<LegKinematics>(leg_lengths);
+    _hip_positions_body <<  0.15505f  , -0.209f , 0.0f ,
+                            0.15505f  , 0.209f  , 0.0f ,
+                            -0.15505f , -0.209f , 0.0f ,
+                            -0.15505f ,  0.209f , 0.0f ; 
+    _foot_positions_body.Zero();
+    _foot_offset << 0.0f , 0.096f , 0.0f , 
+                    0.0f , 0.096f  , 0.0f ,
+                    0.0f , 0.096f  , 0.0f ,
+                    0.0f , 0.096f , 0.0f ;  
+    _foot_positions_leg.Zero();
 }
 
 // 主计算函数 
@@ -86,26 +96,81 @@ Eigen::Vector3d LegSwingController::generateBezier5Trajectory(
     double b4 = 5 * u4 - 5 * u5;
     double b5 = u5;
 
+    // 计算总距离
     double dist = (end - start).norm();
     double h_offset = dist * 0.2; 
-    
+
+
+    Eigen::Vector3d dir = (end - start);
+    dir.z() = 0; // 抹平高度差
+    if (dir.norm() > 0.001) {
+        dir.normalize(); // 变成单位向量
+    } else {
+        dir = Eigen::Vector3d::Zero(); // 原地踏步的情况
+    }
 
     Eigen::Vector3d p0 = start;
     Eigen::Vector3d p1 = start + Eigen::Vector3d(0, 0, lift_height_ * 0.1);
-    Eigen::Vector3d p2 = start + Eigen::Vector3d(h_offset, 0, lift_height_ * 1.1);
-    Eigen::Vector3d p3 = end   + Eigen::Vector3d(-h_offset, 0, lift_height_ * 1.1);
-    Eigen::Vector3d p4 = end   + Eigen::Vector3d(0, 0, lift_height_ * 0.1);
+    Eigen::Vector3d p2 = start + dir * h_offset + Eigen::Vector3d(0, 0, lift_height_ * 1.1);
+    Eigen::Vector3d p3 = end - dir * h_offset + Eigen::Vector3d(0, 0, lift_height_ * 1.1);
+    Eigen::Vector3d p4 = end + Eigen::Vector3d(0, 0, lift_height_ * 0.1);
     Eigen::Vector3d p5 = end;
 
     return b0 * p0 + b1 * p1 + b2 * p2 + b3 * p3 + b4 * p4 + b5 * p5;
 }
 
 // Raibert落脚点算法
-Eigen::Vector3d LegSwingController::generateBezier5Trajectory(
-    )
-{
+Eigen::Vector3f LegSwingController::computeRaibertFootstep(
+    int leg_id,
+    Eigen::Vector3f desired_velocity,
+    float stance_time,
+    float swing_time,
+    float step_height/* ,
+    bool closed_gyro_z */) 
+    {
+
+    float prediction_time = stance_time + swing_time;
+ 
+    float Vx = prediction_time * desired_velocity[0];
+    float Vy = prediction_time * desired_velocity[1];
+    
+    // 从矩阵中获取当前腿的髋关节位置
+    Eigen::Vector3f hip_position = _hip_positions_body.row(leg_id);
+    float hip_offset_x = hip_position[0];
+    float hip_offset_y = hip_position[1];
+    
+    float theta_0 = atan2(hip_offset_y, hip_offset_x);
+    
+    float R = sqrt(hip_offset_x * hip_offset_x + hip_offset_y * hip_offset_y);
+    
+    float theta_f = 0;
+
+    // 暂不接入IMU
+    /* if(closed_gyro_z) {
+         theta_f = theta_0 + _estimator->_state_estimator_data.gyro_body[2] * prediction_time +
+                 _k_feedback * (_estimator->_state_estimator_data.gyro_body[2] - desired_velocity[2]);
+    } else {} */ 
+
+    theta_f = theta_0 + desired_velocity[2] * prediction_time;
     
     
+    float Xf = R * cos(theta_f);
+    float Yf = R * sin(theta_f);
+    
+    float Xi = Vx + Xf;
+    float Yi = Vy + Yf;
+    
+    // 存储机身坐标系下的足端位置
+    _foot_positions_body(leg_id, 0) = Xi;
+    _foot_positions_body(leg_id, 1) = Yi;
+    _foot_positions_body(leg_id, 2) = step_height;
+    
+    // 转换为髋关节坐标系下（只计算当前腿）
+    _foot_positions_leg.row(leg_id) = _foot_positions_body.row(leg_id) 
+                                      - _hip_positions_body.row(leg_id) 
+                                      + _foot_offset.row(leg_id);
+    
+    return _foot_positions_leg.row(leg_id);
 }
 
 // 逆运动学逆解算 

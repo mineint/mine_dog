@@ -55,7 +55,7 @@ void State_Trot::runState(){
             _data->next_foot_target[leg] = destination_pDes_r;
         }
         
-
+    
 
         
     switch (phase)
@@ -145,6 +145,16 @@ void State_Trot::runState(){
             break;
         }
       }
+    /* double t_stance = leg_phase / duty;
+    double t_swing = (leg_phase - duty) / (1.0 - duty);
+    Eigen::Vector3f desired_velocity = {0.f, 0.f, 0.1f};
+    Eigen::Vector3f Raibert[leg];
+    Raibert[leg] = _data->swing_controller->computeRaibertFootstep(leg, desired_velocity, t_stance, t_swing, _data->start_high);
+    if (_data->tx_count % 10 == 0)
+        { 
+        std::cout << "Raibert:" << leg + 1 << Raibert[leg] << std::endl;
+        }  */
+      
     }
     
     /* if (_data->tx_count % 100 == 0)

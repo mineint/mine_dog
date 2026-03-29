@@ -9,6 +9,7 @@
 
 void State_Stand::onEnter(){
     std::cout << "State onEnter" << std::endl;
+    
 }
 
 void State_Stand::runState(){ 
@@ -25,22 +26,23 @@ void State_Stand::runState(){
         
     // 缓慢起步 
     
-    static double timer = 0;
-    const double stand_time = 3.2; 
-    if (timer < stand_time) 
+    
+    const double stand_time = 3.2;    // 需要缓起步就清零time
+    if (_data->timer < stand_time) 
     {
-        timer += 0.001; 
-        double progress = timer / stand_time;
+        _data->timer += 0.001; 
+        double progress = _data->timer / stand_time;
         _data->start_high = -0.06 + progress * (-0.28 - (-0.06));
     } 
         
     Eigen::Vector3d nominal_pDes(0.0, 0.096, _data->start_high); 
 
-    /* if (_data->tx_count % 100 == 0)
+    if (_data->tx_count % 100 == 0)
             { 
             
             std::cout << "start_high:" << _data->start_high << std::endl;
-            } */
+            std::cout << "timer:" << _data->timer << std::endl;
+            }
         
     // VMC相关参数
     LegCommand cmd;

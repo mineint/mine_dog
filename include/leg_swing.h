@@ -26,18 +26,21 @@ public:
         const Eigen::Vector3d& joint_kd  = Eigen::Vector3d(4.0,  4.0,  3.0)
     );
 
-    // 设置抬腿高度
-    void setLiftHeight(double height) { lift_height_ = height; }
-
-    // 调试信息
-    Eigen::Vector3d getLastFootPosition() const { return last_foot_pos_; }
-    Eigen::Vector3d getLastFootVelocity() const { return last_foot_vel_; }
+   
     // 五次贝塞尔轨迹生成（速度连续，适合摆动腿）
     Eigen::Vector3d generateBezier5Trajectory(
         double t,
         const Eigen::Vector3d& start,
         const Eigen::Vector3d& end
     ) const;
+
+    Eigen::Vector3f computeRaibertFootstep(
+    int leg_id,
+    Eigen::Vector3f desired_velocity,
+    float stance_time,
+    float swing_time,
+    float step_height/* ,
+    bool closed_gyro_z */);
 private:
 
     std::unique_ptr<LegKinematics> kinematics_;
@@ -51,6 +54,14 @@ private:
 
     int tx_count = 0;
 
+
+    Eigen::Matrix<float, 4, 3> _hip_positions_body;// 髋关节位置
+    Eigen::Matrix<float, 4, 3> _foot_positions_body; // 足端位置 
+    Eigen::Matrix<float, 4, 3> _foot_offset;// 足端位置在世界坐标系下
+    Eigen::Matrix<float, 4, 3> _foot_positions_leg; // 足端位置在单腿坐标系下 [4x3]
+    
+    
+    
     // 逆运动学
     Eigen::Vector3d inverseKinematics(const Eigen::Vector3d& p) const;
 };
