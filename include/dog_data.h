@@ -4,8 +4,7 @@
 #include "leg_controller.h" 
 #include "leg_kinematics.h"
 #include "leg_swing.h"
-#include "dog_imu.h"
-#include "imu_driver.h"
+#include "imu_reader.h"
 
 struct Leg_Date
 {
@@ -29,10 +28,11 @@ struct FSM_Data {
     std::unique_ptr<LegController> leg_controller;
     std::unique_ptr<LegKinematics> kinematics;   
     std::unique_ptr<LegSwingController> swing_controller;
+    std::unique_ptr<imureader> imu_reader;
     Leg_Date leg_date[4];
     LegController legs_filter[4];   //专门用于处理滤波
-    protocol_info_t imu_data;        //IMU数据
-    ImuDriver imu; 
+
+
 
     std::shared_ptr<Tangair_usb2can> can_ptr;
     std::vector<std::unique_ptr<LegController>> legs;

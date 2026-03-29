@@ -4,7 +4,7 @@
 //#include "xxx.h"
 #include <stddef.h>
 #include <string.h>
-#include "dog_imu.h"
+#include "imu_data.h"
 
 /*------------------------------------------------MARCOS define------------------------------------------------*/
 #define PROTOCOL_FIRST_BYTE_POS 		0

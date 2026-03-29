@@ -16,8 +16,10 @@
 #include "dog_fsm.h"
 #include "state_passive.h"
 #include "state_stand.h"
-#include "imu_driver.h"
+#include "imu_data.h"
 #include "rc.h"
+
+
 
 std::shared_ptr<USBRCReceiver> USBRCReceiver_ptr;
 
@@ -110,14 +112,19 @@ void restore_terminal() {
     (void)ret; 
 }
 
+void imu_init(){
+    
+}
+
 int main() {
     // 1. 系统准备
     tcgetattr(STDIN_FILENO, &original_termios);
     std::signal(SIGINT, signal_handler);
     std::signal(SIGTERM, signal_handler);
 
-    // 2. 初始化硬件 (按你的顺序)
+    // 2. 初始化硬件 
     auto CAN_ptr = std::make_shared<Tangair_usb2can>();
+    
 
     // 3. 初始化 
     auto fsm_ptr = std::make_shared<FSM>(CAN_ptr); 

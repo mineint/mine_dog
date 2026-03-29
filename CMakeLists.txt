@@ -31,9 +31,10 @@ add_executable(can_node
   src/state_passive.cpp
   src/state_stand.cpp
   src/state_trot.cpp
-  src/dog_imu.cpp
   src/rc.cpp
   src/KeyboardReader.cpp
+  src/imu_data.c
+  src/imu_reader.cpp
 )
 
 # 为目标单独添加包含目录（更推荐的方式）

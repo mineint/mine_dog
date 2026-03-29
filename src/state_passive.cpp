@@ -31,11 +31,11 @@ void State_Passive::runState(){
         return;
     }
 
-    if (_data->tx_count % 100 == 0)
+    /* if (_data->tx_count % 100 == 0)
             { 
             
             std::cout << "start_high:" << _data->start_high << std::endl;
-            }
+            } */
 
     _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
 

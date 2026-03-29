@@ -1,7 +1,6 @@
 #include "dog_fsm.h"
 #include "leg_controller.h"
 #include "state_stand.h"
-#include "dog_imu.h"
 #include "state_stand.h"
 
 

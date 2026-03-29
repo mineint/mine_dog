@@ -30,7 +30,7 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
     _data->swing_controller = std::make_unique<LegSwingController>();
     _data->gait_scheduler = std::make_unique<GaitScheduler>();
     readerKey = new KeyboardReader();
- 
+    _data->imu_reader = std::make_unique<imureader>();
 
     // 初始化电机数据结构
     for (int i = 0; i < 4; ++i) {
@@ -145,6 +145,9 @@ void FSM::update(double dt) {
 
     // 更新步态
     _data.get()->gait_scheduler->update(dt);
+    
+    // 更新IMU数据
+    _data->imu_reader->imudateread();
 
     // 执行当前状态的核心行为
     current_state_->runState();

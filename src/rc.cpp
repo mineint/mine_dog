@@ -7,7 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <sched.h>
-#include "setpriority.h"
+
 
 // 静态成员定义
 const uint8_t USBRCReceiver::PACKET_HEADER[2] = {0xAA, 0x55};
