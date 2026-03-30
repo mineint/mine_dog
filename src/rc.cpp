@@ -30,11 +30,6 @@ USBRCReceiver::USBRCReceiver()
     int max_priority = sched_get_priority_max(SCHED_FIFO);
     int min_priority = sched_get_priority_min(SCHED_FIFO);
 
-    //pthread_t native_handle = _RC_thread.native_handle(); // 获取原生线程句柄
-
-     // 设置线程调度策略为 FIFO
-    //sched_param sch_params;
-    //sch_params.sched_priority = max_priority; 
 
 }
 

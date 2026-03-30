@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 #include <string>
 
+struct FSM_Data;
+
 enum class GaitType {
     STAND,          // 静止站立
     TROT,           // 对角小跑

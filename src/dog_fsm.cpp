@@ -30,15 +30,12 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
     _data->swing_controller = std::make_unique<LegSwingController>();
     _data->gait_scheduler = std::make_unique<GaitScheduler>();
     readerKey = new KeyboardReader();
-    _data->imu_reader = std::make_unique<imureader>();
 
     // 初始化电机数据结构
     for (int i = 0; i < 4; ++i) {
         _data->leg_date[i] = Leg_Date();
     }
 
-    //_data->command = "passive";
-    //_data->gait_scheduler->current_gait_ = GaitType::TROT;
     current_state_ = std::make_unique<State_Passive>(_data.get());
 }
 
@@ -139,7 +136,6 @@ void FSM::update(double dt) {
 
     char rc = readerKey->readKey();
     
-
     // 更新电机数据
     update_motor(_data.get(), _data->can_ptr.get());
 
@@ -147,7 +143,7 @@ void FSM::update(double dt) {
     _data.get()->gait_scheduler->update(dt);
     
     // 更新IMU数据
-    _data->imu_reader->imudateread();
+    //_data->imu_reader->ImuDateRead(); //未测试imu
 
     // 执行当前状态的核心行为
     current_state_->runState();

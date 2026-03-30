@@ -124,7 +124,7 @@ int main() {
 
     // 2. 初始化硬件 
     auto CAN_ptr = std::make_shared<Tangair_usb2can>();
-    
+    auto imu_reader = std::make_shared<ImuReader>();
 
     // 3. 初始化 
     auto fsm_ptr = std::make_shared<FSM>(CAN_ptr); 

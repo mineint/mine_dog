@@ -24,18 +24,20 @@ struct FSM_Data {
     double trot_wide = 0;
     double trot_wide_r = 0;
     double trot_wide_l = 0;
+    
+    std::shared_ptr<Tangair_usb2can> can_ptr;
     std::unique_ptr<GaitScheduler> gait_scheduler;
     std::unique_ptr<LegController> leg_controller;
     std::unique_ptr<LegKinematics> kinematics;   
     std::unique_ptr<LegSwingController> swing_controller;
-    std::unique_ptr<imureader> imu_reader;
+    std::unique_ptr<ImuReader> imu_reader;
     Leg_Date leg_date[4];
     LegController legs_filter[4];   //专门用于处理滤波
 
 
 
-    std::shared_ptr<Tangair_usb2can> can_ptr;
-    std::vector<std::unique_ptr<LegController>> legs;
+    
+
     
     double dt = 0.001;  // 控制周期
     Eigen::Vector3d last_touchdown_pos[4];

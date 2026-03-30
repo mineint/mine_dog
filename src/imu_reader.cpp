@@ -14,7 +14,7 @@
 
 
 
-imureader::imureader()
+ImuReader::ImuReader() : imu_running(true)
 {
     dev = "/dev/ttyUSB0";	
     fd = open(dev, O_RDWR | O_NONBLOCK| O_NOCTTY | O_NDELAY); 
@@ -37,9 +37,37 @@ imureader::imureader()
     tcgetattr(fd,&oldtio);
 	
     memset(buffer,0,sizeof(buffer)); 
+
+
+    // 启动线程
+    _imu_read_thread = std::thread(&ImuReader::run, this);
+
+    printf("_imu_read_thread 启动!\n");
+    // 设置线程优先级
+    int max_priority = sched_get_priority_max(SCHED_FIFO);
+    set_thread_priority(_imu_read_thread, max_priority);
 }
 
-void imureader::imudateread(){
+void ImuReader::set_thread_priority(std::thread& th, int priority) {
+    sched_param sch_params;
+    sch_params.sched_priority = priority;
+    if (pthread_setschedparam(th.native_handle(), SCHED_FIFO, &sch_params) != 0) {
+        perror("Failed to set thread priority");
+    }
+}
+
+ImuReader::~ImuReader() {
+    imu_running = false; // 停止运行标志
+    if (_imu_read_thread.joinable()) {
+        _imu_read_thread.join(); 
+    }
+    
+    // close 需要传入文件描述符 fd
+    if (fd >= 0) {
+        ::close(fd); 
+    }
+}
+void ImuReader::ImuDateRead(){
     nread = read(fd, buffer, RX_BUF_LEN);
 	if(nread > 0)
 	{
@@ -82,5 +110,12 @@ void imureader::imudateread(){
         memcpy(g_recv_buf, g_recv_buf + pos, cnt);
         g_recv_buf_idx = cnt;
 	tcflush(fd,TCIFLUSH);
-	usleep(10000);
+}
+
+void ImuReader::run() {
+    while (imu_running) {
+        // 降低 CPU 占用，且保证实时性
+        std::this_thread::sleep_for(std::chrono::microseconds(1000));
+        ImuDateRead();
+    }
 }
