@@ -5,6 +5,7 @@
 #include "Tangair_usb2can.h"
 #include "leg_controller.h"
 #include "gait_scheduler.h"
+#include "imu_reader.h"
 
 // 采用单腿局部坐标系一致性，向外为正
 
@@ -21,10 +22,10 @@ const float knee_offset[4] = {2.5144f, 2.5144f, 2.5144f, 2.5144f};
 
 
 
-
-FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
+FSM::FSM(std::shared_ptr<Tangair_usb2can> can, std::shared_ptr<ImuReader> imu) {
     _data = std::make_unique<FSM_Data>();
     _data->can_ptr = can;
+    _data->imu_ptr = imu;
     _data->leg_controller = std::make_unique<LegController>();
     _data->kinematics = std::make_unique<LegKinematics>(Eigen::Vector3f(0.096f, 0.21f, 0.21f));
     _data->swing_controller = std::make_unique<LegSwingController>();
@@ -42,25 +43,25 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can) {
 
 
 // 更新电机信息，并进行零点偏移
-void FSM::update_motor(FSM_Data* data, Tangair_usb2can* can_ptr) {
+void FSM::update_motor(Tangair_usb2can* can_ptr) {
    
-   USB2CAN_CAN_Bus_Struct Motor_recieve[4];
+  USB2CAN_CAN_Bus_Struct Motor_recieve[4];
 
-    Motor_recieve[0] = can_ptr->USB2CAN0_CAN_Bus_1;
-    Motor_recieve[1] = can_ptr->USB2CAN0_CAN_Bus_2;
-    Motor_recieve[2] = can_ptr->USB2CAN1_CAN_Bus_1;
-    Motor_recieve[3] = can_ptr->USB2CAN1_CAN_Bus_2;
+  Motor_recieve[0] = can_ptr->USB2CAN0_CAN_Bus_1;
+  Motor_recieve[1] = can_ptr->USB2CAN0_CAN_Bus_2;
+  Motor_recieve[2] = can_ptr->USB2CAN1_CAN_Bus_1;
+  Motor_recieve[3] = can_ptr->USB2CAN1_CAN_Bus_2;
     
-     for (int leg = 0; leg < 4; leg++) {
-        // q: 关节位置
-        _data->leg_date[leg].q(0) = Motor_recieve[leg].ID_1_motor_recieve.current_position_f * abad_side_sign[leg] + abad_offset[leg];
-        _data->leg_date[leg].q(1) = Motor_recieve[leg].ID_2_motor_recieve.current_position_f * hip_side_sign[leg] + hip_offset[leg];
-        _data->leg_date[leg].q(2) = Motor_recieve[leg].ID_3_motor_recieve.current_position_f * knee_side_sign[leg] + knee_offset[leg];
+  for (int leg = 0; leg < 4; leg++) {
+    // q: 关节位置
+    _data->leg_date[leg].q(0) = Motor_recieve[leg].ID_1_motor_recieve.current_position_f * abad_side_sign[leg] + abad_offset[leg];
+    _data->leg_date[leg].q(1) = Motor_recieve[leg].ID_2_motor_recieve.current_position_f * hip_side_sign[leg] + hip_offset[leg];
+    _data->leg_date[leg].q(2) = Motor_recieve[leg].ID_3_motor_recieve.current_position_f * knee_side_sign[leg] + knee_offset[leg];
         
-        // qd: 关节速度
-        _data->leg_date[leg].qd(0) = Motor_recieve[leg].ID_1_motor_recieve.current_speed_f * abad_side_sign[leg];
-        _data->leg_date[leg].qd(1) = Motor_recieve[leg].ID_2_motor_recieve.current_speed_f * hip_side_sign[leg];
-        _data->leg_date[leg].qd(2) = Motor_recieve[leg].ID_3_motor_recieve.current_speed_f * knee_side_sign[leg];
+    // qd: 关节速度
+    _data->leg_date[leg].qd(0) = Motor_recieve[leg].ID_1_motor_recieve.current_speed_f * abad_side_sign[leg];
+    _data->leg_date[leg].qd(1) = Motor_recieve[leg].ID_2_motor_recieve.current_speed_f * hip_side_sign[leg];
+    _data->leg_date[leg].qd(2) = Motor_recieve[leg].ID_3_motor_recieve.current_speed_f * knee_side_sign[leg];
     } 
 
     // 电机限位保护
@@ -78,56 +79,63 @@ void FSM::update_motor(FSM_Data* data, Tangair_usb2can* can_ptr) {
     _data->leg_date[3].q(1) > -1.5 && _data->leg_date[3].q(1) < 1.5 &&
     _data->leg_date[3].q(2) > 1 && _data->leg_date[3].q(2) < 2.6
         )
-        {
+      {
 
-            if (_data->tx_count % 200 == 0)
-            {
+        if (_data->tx_count % 200 == 0)
+        {
             
-            /* std::cout << "正常" << std::endl;
-           std::cout << "position 1: " << _data->leg_date[0].qd(0) << std::endl;  
-           std::cout << "position 2: " << _data->leg_date[0].qd(1) << std::endl;
-           std::cout << "position 3: " << _data->leg_date[0].qd(2) << std::endl;
-           std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
-           std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
-           std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
-           std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
-           std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
-           std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
-           std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
-           std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
-           std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; */ 
-            }
+        // std::cout << "正常" << std::endl;
+        // std::cout << "position 1: " << _data->leg_date[0].qd(0) << std::endl;  
+        // std::cout << "position 2: " << _data->leg_date[0].qd(1) << std::endl;
+        // std::cout << "position 3: " << _data->leg_date[0].qd(2) << std::endl;
+        // std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
+        // std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
+        // std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
+        // std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
+        // std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
+        // std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
+        // std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
+        // std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
+        // std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; 
         }
-        else
-        {
-            _data->command = "passive";
-            _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
-            //_data->can_ptr->DISABLE_ALL_MOTOR(100); 
+  }
+    else
+    {
+      _data->command = "passive";
+      _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
+      //_data->can_ptr->DISABLE_ALL_MOTOR(100); 
 
-            if (_data->tx_count % 200 == 0)
-            {         
-            std::cout << "危险：已进入被动状态！！！" << std::endl;
-           /* std::cout << "position 1: " << _data->leg_date[0].q(0) << std::endl; 
-           std::cout << "position 2: " << _data->leg_date[0].q(1) << std::endl;
-           std::cout << "position 3: " << _data->leg_date[0].q(2) << std::endl;
-           std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
-           std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
-           std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
-           std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
-           std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
-           std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
-           std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
-           std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
-           std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; */
-            }
+      if (_data->tx_count % 200 == 0)
+      {         
+        std::cout << "危险：已进入被动状态！！！" << std::endl;
+        // std::cout << "position 1: " << _data->leg_date[0].q(0) << std::endl; 
+        // std::cout << "position 2: " << _data->leg_date[0].q(1) << std::endl;
+        // std::cout << "position 3: " << _data->leg_date[0].q(2) << std::endl;
+        // std::cout << "position 4: " << _data->leg_date[1].q(0) << std::endl; 
+        // std::cout << "position 5: " << _data->leg_date[1].q(1) << std::endl;
+        // std::cout << "position 6: " << _data->leg_date[1].q(2) << std::endl;
+        // std::cout << "position 7: " << _data->leg_date[2].q(0) << std::endl; 
+        // std::cout << "position 8: " << _data->leg_date[2].q(1) << std::endl;
+        // std::cout << "position 9: " << _data->leg_date[2].q(2) << std::endl;
+        // std::cout << "position10: " << _data->leg_date[3].q(0) << std::endl; 
+        // std::cout << "position11: " << _data->leg_date[3].q(1) << std::endl;
+        // std::cout << "position12: " << _data->leg_date[3].q(2) << std::endl; 
         }
-
-
+    }
 }
 
+void FSM::update_imu(ImuReader* imu_ptr) {
+  _data->imu_data.pitch = imu_ptr->g_output_info.attitude.pitch;
+  _data->imu_data.roll = imu_ptr->g_output_info.attitude.roll;
+  _data->imu_data.yaw = imu_ptr->g_output_info.attitude.yaw;
+
+  // std::cout << "pitch: " << _data->imu_data.pitch << std::endl;
+  // std::cout << "roll: " << _data->imu_data.roll << std::endl;
+  // std::cout << "yaw: " << _data->imu_data.yaw << std::endl;
+}
 
 void FSM::update(double dt) {
-    if (!_data || !_data.get() || !current_state_) {
+     if (!_data || !_data.get() || !current_state_) {
         std::cerr << "[FSM] update: invalid state or data\n";
         return;
     }
@@ -137,13 +145,14 @@ void FSM::update(double dt) {
     char rc = readerKey->readKey();
     
     // 更新电机数据
-    update_motor(_data.get(), _data->can_ptr.get());
+    update_motor(_data->can_ptr.get());
+    
+    // 更新IMU数据
+    update_imu(_data->imu_ptr.get());
+     
 
     // 更新步态
     _data.get()->gait_scheduler->update(dt);
-    
-    // 更新IMU数据
-    //_data->imu_reader->ImuDateRead(); //未测试imu
 
     // 执行当前状态的核心行为
     current_state_->runState();

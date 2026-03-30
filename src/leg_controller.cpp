@@ -13,9 +13,6 @@ LegController::LegController() {
         );
 
     std::cout << "[INFO] 初始化LegController配置." << std::endl;
-
-    
-
 }
 
 LegController::~LegController() {
@@ -100,36 +97,36 @@ void LegController::sendJointTorques(Tangair_usb2can* can_ptr,
         bus->ID_2_motor_send.torque = tau(1);  // hip
         bus->ID_3_motor_send.torque = tau(2);  // knee 
        
-        /*  std::cout << "tau 1:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque << std::endl;
-        std::cout << "tau 2:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque << std::endl;
-        std::cout << "tau 3:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.torque << std::endl;
-        std::cout << "tau 4:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque << std::endl;
-        std::cout << "tau 5:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.torque << std::endl;
-        std::cout << "tau 6:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.torque << std::endl;
-        std::cout << "tau 7:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.torque << std::endl;
-        std::cout << "tau 8:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.torque << std::endl;
-        std::cout << "tau 9:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.torque << std::endl;
-        std::cout << "tau10:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque << std::endl;
-        std::cout << "tau11:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque << std::endl;
-        std::cout << "tau12:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque << std::endl;  */
+        // std::cout << "tau 1:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque << std::endl;
+        // std::cout << "tau 2:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque << std::endl;
+        // std::cout << "tau 3:\n " << can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.torque << std::endl;
+        // std::cout << "tau 4:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque << std::endl;
+        // std::cout << "tau 5:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.torque << std::endl;
+        // std::cout << "tau 6:\n " << can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.torque << std::endl;
+        // std::cout << "tau 7:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.torque << std::endl;
+        // std::cout << "tau 8:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.torque << std::endl;
+        // std::cout << "tau 9:\n " << can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.torque << std::endl;
+        // std::cout << "tau10:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque << std::endl;
+        // std::cout << "tau11:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque << std::endl;
+        // std::cout << "tau12:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque << std::endl;  
    }  
     
-    //can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -1;
+    // can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -1;
     // 测试力矩
-    //can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque = 1;
-    //can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque = -1;
-    /*can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.torque = -2;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque = 2;
+    // can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque = 1;
+    // can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque = -1;
+    // can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.torque = -2;
+    // can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque = 2;
 
-    can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -2;
-    can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.torque = 2;
-    can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.torque = -2;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque = 2;
+    // can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -2;
+    // can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.torque = 2;
+    // can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.torque = -2;
+    // can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque = 2;
 
-     can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.torque = -2;
-    can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.torque = 2;
-    can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.torque = -2;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque = 2;  */
+    //  can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.torque = -2;
+    // can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.torque = 2;
+    // can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.torque = -2;
+    // can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque = 2;  
 
 
     can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.kd = 0;

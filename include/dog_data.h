@@ -12,6 +12,13 @@ struct Leg_Date
     Eigen::Vector3d qd;
 };
 
+struct IMU_Date
+{
+    float pitch;			
+	float roll;
+	float yaw;
+};
+
 
 struct FSM_Data {
     double controlMode;      // 控制模式
@@ -26,6 +33,7 @@ struct FSM_Data {
     double trot_wide_l = 0;
     
     std::shared_ptr<Tangair_usb2can> can_ptr;
+    std::shared_ptr<ImuReader> imu_ptr;
     std::unique_ptr<GaitScheduler> gait_scheduler;
     std::unique_ptr<LegController> leg_controller;
     std::unique_ptr<LegKinematics> kinematics;   
@@ -33,7 +41,7 @@ struct FSM_Data {
     std::unique_ptr<ImuReader> imu_reader;
     Leg_Date leg_date[4];
     LegController legs_filter[4];   //专门用于处理滤波
-
+    IMU_Date imu_data;
 
 
     

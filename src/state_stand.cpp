@@ -76,19 +76,6 @@ void State_Stand::runState(){
     // 存储力矩
     leg_torques[leg] = leg_tau; 
 }
-        
-
-    /* if (_data->imu.update()) {
-            // 如果解析到了新的一帧，获取数据
-            auto data = _data->imu.getImuData();
-            
-            // 打印姿态，或者传给你的机器狗平衡算法
-            printf("[Robot State] Pitch: %.2f | Roll: %.2f | Yaw: %.2f\n", 
-                    data.attitude.pitch, 
-                    data.attitude.roll, 
-                    data.attitude.yaw);
-        } */
-
     
     Eigen::VectorXd all_torques(12);
     int idx = 0;

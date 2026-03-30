@@ -97,12 +97,11 @@ void ImuReader::ImuDateRead(){
                 unsigned int frame_len = header->len + YIS_OUTPUT_MIN_BYTES;
                 cnt -= frame_len;
                 pos += frame_len;
-                //memcpy(g_recv_buf, g_recv_buf + pos, cnt);
+                // memcpy(g_recv_buf, g_recv_buf + pos, cnt);
 
                 if(analysis_ok == ret)
                 {
-                    printf("pitch: %f, roll: %f, yaw: %f\n", 
-			  g_output_info.attitude.pitch, g_output_info.attitude.roll, g_output_info.attitude.yaw);
+                    // printf("pitch: %f, roll: %f, yaw: %f\n", g_output_info.attitude.pitch, g_output_info.attitude.roll, g_output_info.attitude.yaw);
                 }
 	    }
 	}

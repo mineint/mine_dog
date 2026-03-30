@@ -31,11 +31,11 @@ void State_Passive::runState(){
         return;
     }
 
-    /* if (_data->tx_count % 100 == 0)
-            { 
+    //  if (_data->tx_count % 100 == 0)
+    //         { 
             
-            std::cout << "start_high:" << _data->start_high << std::endl;
-            } */
+    //         std::cout << "start_high:" << _data->start_high << std::endl;
+    //         } 
 
     _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
 
@@ -46,7 +46,7 @@ void State_Passive::runState(){
 }
 
 FSM_StateName State_Passive::checkTransition(){
-    //std::cout <<  "State_Passive检查切换" << _data->command << std::endl;
+    // std::cout <<  "State_Passive检查切换" << _data->command << std::endl;
     if (_data->command == "stand") 
     {
         return FSM_StateName::STAND;

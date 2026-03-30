@@ -24,7 +24,7 @@ private:
 
     unsigned char g_recv_buf[512] = {0};
     unsigned short g_recv_buf_idx = 0;
-    protocol_info_t g_output_info = {0};
+    
 
     
 
@@ -35,6 +35,8 @@ public:
     void ImuDateRead();
     void run();
     void set_thread_priority(std::thread& th, int priority);
+    
+    protocol_info_t g_output_info = {0};
     std::thread _imu_read_thread;
     std::atomic<bool> imu_running;
 };

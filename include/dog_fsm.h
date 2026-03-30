@@ -36,7 +36,7 @@ protected:
 
 class FSM {
 public:
-    explicit FSM(std::shared_ptr<Tangair_usb2can> can = nullptr);
+    explicit FSM(std::shared_ptr<Tangair_usb2can> can = nullptr, std::shared_ptr<ImuReader> imu = nullptr);
 
     // 主更新函数
     void update(double dt);
@@ -44,7 +44,9 @@ public:
     // 状态切换
     void transitionTo(FSM_StateName next);
 
-    void update_motor(FSM_Data* data, Tangair_usb2can* can_device);
+    void update_motor(Tangair_usb2can* can_device);
+
+    void update_imu(ImuReader* imu_ptr);
 
     // 数据访问
     FSM_Data* getData() { return _data.get(); }
