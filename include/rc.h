@@ -44,7 +44,6 @@ private:
 
     const char* Device = "/dev/ttyACM0";
 
-    // const char* Device = "/dev/ttyACM2";
 
 public:
     // 构造函数

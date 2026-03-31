@@ -10,8 +10,8 @@
 
 
 // 静态成员定义
-const uint8_t USBRCReceiver::PACKET_HEADER[2] = {0xAA, 0x55};
-const uint8_t USBRCReceiver::PACKET_TAIL[2] = {0x0D, 0x0A};
+const uint8_t USBRCReceiver::PACKET_HEADER[2] = {0xAA, 0xAA};
+const uint8_t USBRCReceiver::PACKET_TAIL[2] = {0x55, 0x55};
 
 // 构造函数
 USBRCReceiver::USBRCReceiver() 
@@ -29,7 +29,6 @@ USBRCReceiver::USBRCReceiver()
 
     int max_priority = sched_get_priority_max(SCHED_FIFO);
     int min_priority = sched_get_priority_min(SCHED_FIFO);
-
 
 }
 
@@ -114,27 +113,25 @@ int USBRCReceiver::findPacketHeader(const uint8_t* buf, int len) {
 
 // 解析数据包
 bool USBRCReceiver::parsePacket(const uint8_t* packet, RCData& data) {
-    // 从包中提取数据部分（跳过包头，取20字节数据）
-    const uint8_t* payload = packet + 2;
-    
+ 
     // 先读取float值，然后转换为int
     float temp_float;
-    memcpy(&temp_float, payload, sizeof(float));
+    memcpy(&temp_float, packet + 3, sizeof(float));
     data.Left_X = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, payload + 4, sizeof(float));
+    memcpy(&temp_float, packet + 4, sizeof(float));
     data.Left_Y = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, payload + 8, sizeof(float));
+    memcpy(&temp_float, packet + 5, sizeof(float));
     data.Right_X = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, payload + 12, sizeof(float));
+    memcpy(&temp_float, packet + 6, sizeof(float));
     data.Right_Y = static_cast<int>(temp_float);
     
-    data.S1 = payload[16];
-    data.S2 = payload[17];
-    data.A = payload[18];
-    data.B = payload[19];
+    data.S1 = packet[7];
+    data.S2 = packet[8];
+    data.A = packet[9];
+    data.B = packet[10];
     
     return true;
 }
@@ -152,7 +149,7 @@ void USBRCReceiver::RC_thread_function() {
         t += std::chrono::microseconds(1000);
         
         readRCData();
-        //std::cout << "RC_thread_function" << std::endl;
+        std::cout << "RC_thread_function" << std::endl;
         
         std::this_thread::sleep_until(t);
     }

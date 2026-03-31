@@ -14,6 +14,7 @@ enum class FSM_StateName {
     PASSIVE,
     STAND,
     TROT,
+    JUMP,
 };
 
 class FSM_State {

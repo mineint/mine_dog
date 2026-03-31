@@ -45,15 +45,12 @@ void State_Passive::runState(){
 
 }
 
+// passive仅可以切换为stand
 FSM_StateName State_Passive::checkTransition(){
     // std::cout <<  "State_Passive检查切换" << _data->command << std::endl;
     if (_data->command == "stand") 
     {
         return FSM_StateName::STAND;
-    }
-    if (_data->command == "trot") 
-    {
-        return FSM_StateName::TROT;
     }
     else
     {

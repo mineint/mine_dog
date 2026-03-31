@@ -19,10 +19,6 @@
 #include "imu_data.h"
 #include "rc.h"
 
-
-
-std::shared_ptr<USBRCReceiver> USBRCReceiver_ptr;
-
 // 全局标志位
 std::atomic<bool> should_exit{false};
 
@@ -117,47 +113,40 @@ void imu_init(){
 }
 
 int main() {
-    // 1. 系统准备
+    // 系统准备
     tcgetattr(STDIN_FILENO, &original_termios);
     std::signal(SIGINT, signal_handler);
     std::signal(SIGTERM, signal_handler);
 
-    // 2. 初始化硬件 
+    // 初始化硬件 
     auto CAN_ptr = std::make_shared<Tangair_usb2can>();
     auto IMU_ptr = std::make_shared<ImuReader>();
-
-    // 3. 初始化 
     auto FSM_ptr = std::make_shared<FSM>(CAN_ptr, IMU_ptr); 
     auto ConFSM_ptr = std::make_shared<ControlFSM>(FSM_ptr, CAN_ptr);
-    //USBRCReceiver_ptr = std::make_shared<USBRCReceiver>();
+    auto USBRC_ptr = std::make_shared<USBRCReceiver>();
     //auto ConFSM_ptr = std::make_shared<ControlFSM>(CAN_ptr);
-    // 初始化RC接收器
 
-    /* if (!USBRCReceiver_ptr->initialize()) {
-        std::cerr << "[WARNING] Failed to initialize USBRCReceiver, continuing without RC..." << std::endl;
-    } else {
-        std::cout << "[INFO] USBRCReceiver initialized successfully." << std::endl;
-    } */
 
-    // 4. 启动控制线程
+
+    // 启动控制线程
     ConFSM_ptr->startFSMThread();
 
-    // 5. 主循环 (低频监控)
+    // 主循环 (低频监控)
     std::cout << "[Main] System running. Press Ctrl+C to stop.\n";
     while (!should_exit.load()) {
-         /* std::cout << "RC Data - CH0: " << USBRCReceiver_ptr->_RCData.Left_X
-                      << ", CH1: " << USBRCReceiver_ptr->_RCData.Left_Y
-                      << ", CH2: " << USBRCReceiver_ptr->_RCData.Right_X
-                      << ", CH3: " << USBRCReceiver_ptr->_RCData.Right_Y
-                      << ", S1: " << (int)USBRCReceiver_ptr->_RCData.S1 
-                      << ", S2: " << (int)USBRCReceiver_ptr->_RCData.S2 
-                      << ", A: " << (int)USBRCReceiver_ptr->_RCData.A
-                      << ", B: " << (int)USBRCReceiver_ptr->_RCData.B
-                      << "\n";  */
+         std::cout << "RC Data - CH0: " << USBRC_ptr->_RCData.Left_X
+                      << ", CH1: " << USBRC_ptr->_RCData.Left_Y
+                      << ", CH2: " << USBRC_ptr->_RCData.Right_X
+                      << ", CH3: " << USBRC_ptr->_RCData.Right_Y
+                      << ", S1: " << (int)USBRC_ptr->_RCData.S1 
+                      << ", S2: " << (int)USBRC_ptr->_RCData.S2 
+                      << ", A: " << (int)USBRC_ptr->_RCData.A
+                      << ", B: " << (int)USBRC_ptr->_RCData.B
+                      << "\n"; 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    // 6. 优雅退出流程
+    // 优雅退出流程
     std::cout << "[Main] Starting graceful shutdown...\n";
     
     // 第一步：停止控制线程（它会负责发送 DISABLE 指令）
