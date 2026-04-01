@@ -1,14 +1,14 @@
 #include "dog_fsm.h"
 #include "leg_controller.h"
-#include "State_jump.h"
-#include "State_jump.h"
+#include "state_jump.h"
+
 
 
 
 
 void State_Jump::onEnter(){
-    std::cout << "State onEnter" << std::endl;
-    
+    std::cout << "State Jump onEnter" << std::endl;
+    double last_high = _data->start_high;
 }
 
 void State_Jump::runState(){ 
@@ -21,56 +21,76 @@ void State_Jump::runState(){
 
     
     
-    // 记得清零time
-    const double jump_time = 2.2;    // 跳跃总时长
-    const double crouch_time = 1.0;   // 下蹲/起立时长
-    const double flight_time = 0.2;   // 飞行时长
-    const double crouch_high = -0.18;   // 下蹲高度
-    const double rise_high = -0.18;   // 起立高度
+    
 
     if (_data->j_timer < jump_time) 
     {
         _data->j_timer += 0.001; 
-        double progress = _data->j_timer / jump_time;
 
         // 下蹲中
         if (_data->j_timer < crouch_time)
-        {
-            double crouch_progress = _data->j_timer / crouch_time;
-            _data->jump_back = 0.00;
-            _data->start_high = _data->start_high + crouch_progress * (crouch_high - _data->start_high);
+        {   //std::cout << "下蹲中"<< std::endl;
+            crouch_progress = _data->j_timer / crouch_time;
+            double smooth_step = crouch_progress * crouch_progress * (3 - 2 * crouch_progress); 
+            _data->start_high = last_high + smooth_step * (crouch_high - last_high);
+            jump_pDes = {0.00, 0.096, _data->start_high};
         }
         
-        // 飞行中（难点）
+        // 阶段一飞行中（难点）
+        else if (_data->j_timer < (crouch_time + flight_time_1))
+        {
+            double flight_progress_1 = (_data->j_timer - crouch_time) / flight_time_1;
+
+            double smooth_step = flight_progress_1 * flight_progress_1 * (3 - 2 * flight_progress_1); 
+            _data->start_high = crouch_high + smooth_step * (flight_high - crouch_high);
+            _data->jump_long = 0 + smooth_step * (jump_back - 0);
+            jump_pDes = {_data->jump_long, 0.096, _data->start_high};
+            
+        }
+
+        else if (_data->j_timer < (crouch_time + flight_time - flight_time_2))
+        {
+            jump_pDes = flight_pos;
+            
+        }
+
+        // 阶段二飞行中（难点）
         else if (_data->j_timer < (crouch_time + flight_time))
         {
-            double flight_progress = (_data->j_timer - crouch_time) / flight_time;
-            _data->start_high = -0.06 + crouch_progress * (-0.28 - (-0.06));
+            double flight_progress_2 = (_data->j_timer - crouch_time - flight_time + flight_time_2) / flight_time_2;
+
+            double smooth_step = flight_progress_2 * flight_progress_2 * (3 - 2 * flight_progress_2); 
+            _data->start_high = flight_high + smooth_step * (crouch_high - flight_high);
+            _data->jump_long = jump_back + smooth_step * (0 - jump_back);
+            jump_pDes = {_data->jump_long, 0.096, _data->start_high};
+            
         }
 
         // 起立中
         else
         {
             double rise_progress = (_data->j_timer - crouch_time - flight_time) / crouch_time;
-            _data->jump_back = 0.00;
-            _data->start_high = _data->start_high + crouch_progress * (rise_high - _data->start_high);
+            double smooth_step = rise_progress * rise_progress * (3 - 2 * rise_progress);
+            _data->start_high = crouch_high + smooth_step * (rise_high - crouch_high);
+            jump_pDes = {0.00, 0.096, _data->start_high};
         }
 
     } 
         
-    Eigen::Vector3d nominal_pDes(_data->jump_back, 0.096, _data->start_high); 
+    
 
-    if (_data->tx_count % 100 == 0)
+    if (_data->tx_count % 10 == 0)
             { 
-            
-            std::cout << "start_high:" << _data->start_high << std::endl;
-            std::cout << "timer:" << _data->timer << std::endl;
+            //std::cout << "j_timer:" << _data->j_timer << std::endl;
+            //std::cout << "crouch_progress:" << crouch_progress << std::endl;
+            //std::cout << "start_high:" << _data->start_high << std::endl;
+            std::cout << "jump_pDes:" << jump_pDes << std::endl;
             }
         
     // VMC相关参数
     LegCommand cmd;
-    cmd.pDes   = nominal_pDes;
-    cmd.vDes   = Eigen::Vector3d::Zero();  // 站立时目标速度为 0
+    cmd.pDes   = jump_pDes;
+    cmd.vDes   = Eigen::Vector3d::Zero();
     cmd.kpCart = _data->leg_controller->stance_kp;         
     cmd.kdCart = _data->leg_controller->stance_kd;
 
@@ -135,5 +155,5 @@ FSM_StateName State_Jump::checkTransition(){
 }
 
 void State_Jump::onExit(){
-    std::cout << "Stand onExit" << std::endl;
+    std::cout << "Stand Jump onExit" << std::endl;
 }

@@ -2,6 +2,7 @@
 #include "state_passive.h"   
 #include "state_stand.h"
 #include "state_trot.h"
+#include "state_jump.h"
 #include "Tangair_usb2can.h"
 #include "leg_controller.h"
 #include "gait_scheduler.h"
@@ -172,7 +173,13 @@ void FSM::update(double dt) {
         _data->command = "trot";
         std::cout << "切换到行走模式" << std::endl;
         break;
-        
+
+      case 'j':
+      case 'J':
+        _data->command = "jump";
+        std::cout << "切换到跳跃模式" << std::endl;
+        break;
+
       case 'p':
       case 'P':
       case ' ':
@@ -286,7 +293,9 @@ void FSM::update(double dt) {
             case FSM_StateName::TROT:
                 current_state_ = std::make_unique<State_Trot>(_data.get());
                 break;
-            
+            case FSM_StateName::JUMP:
+                current_state_ = std::make_unique<State_Jump>(_data.get());
+                break;
         }
 
         // 进入新状态

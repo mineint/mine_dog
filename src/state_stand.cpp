@@ -1,13 +1,13 @@
 #include "dog_fsm.h"
 #include "leg_controller.h"
 #include "state_stand.h"
-#include "state_stand.h"
+
 
 
 
 
 void State_Stand::onEnter(){
-    std::cout << "State onEnter" << std::endl;
+    std::cout << "State Stand onEnter" << std::endl;
     
 }
 
@@ -26,12 +26,13 @@ void State_Stand::runState(){
     // 缓慢起步 
     
     
-    const double stand_time = 3.2;    // 需要缓起步就清零time
+    const double stand_time = 2.3;    // 需要缓起步就清零time
     if (_data->timer < stand_time) 
     {
         _data->timer += 0.001; 
         double progress = _data->timer / stand_time;
-        _data->start_high = -0.06 + progress * (-0.28 - (-0.06));
+        double smooth_step = progress * progress * (3 - 2 * progress); 
+        _data->start_high = -0.06 + smooth_step * (-0.28 - (-0.06));
     } 
         
     Eigen::Vector3d nominal_pDes(0.0, 0.096, _data->start_high); 
@@ -115,5 +116,5 @@ FSM_StateName State_Stand::checkTransition(){
 }
 
 void State_Stand::onExit(){
-    std::cout << "Stand onExit" << std::endl;
+    std::cout << "Stand Stand onExit" << std::endl;
 }

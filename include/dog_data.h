@@ -26,7 +26,7 @@ struct FSM_Data {
     double j_timer = 0;        // 跳跃计时
     std::string command;     // 模式转换标志
     double start_high = -0.06;
-    double jump_back = -0.06;   // 跳跃时的x方向
+    double jump_long = 0.00;   
     double trot_long = 0;
     double trot_long_r = 0;
     double trot_long_l = 0;

@@ -31,6 +31,7 @@ add_executable(can_node
   src/state_passive.cpp
   src/state_stand.cpp
   src/state_trot.cpp
+  src/state_jump.cpp
   src/rc.cpp
   src/KeyboardReader.cpp
   src/imu_data.c
