@@ -33,6 +33,7 @@ struct FSM_Data {
     double trot_wide = 0;
     double trot_wide_r = 0;
     double trot_wide_l = 0;
+    double lift_height = 0.10;  // 抬腿高度
     
     std::shared_ptr<Tangair_usb2can> can_ptr;
     std::shared_ptr<ImuReader> imu_ptr;
@@ -54,11 +55,11 @@ struct FSM_Data {
     Eigen::Vector3d next_foot_target[4];
 
      
-    Eigen::Vector3d swing_kp{20, 24, 24};
-    Eigen::Vector3d swing_kd{1, 1.2, 1.2};
+    //Eigen::Vector3d swing_kp{20, 24, 24};
+    //Eigen::Vector3d swing_kd{1, 1.2, 1.2};
 
-    //Eigen::Vector3d swing_kp{3, 3, 3};
-    //Eigen::Vector3d swing_kd{0.15, 0.15, 0.15};
+    Eigen::Vector3d swing_kp{3, 3, 3};
+    Eigen::Vector3d swing_kd{0.15, 0.15, 0.15};
 
     uint32_t tx_count = 0;
   

@@ -68,16 +68,16 @@ void FSM::update_motor(Tangair_usb2can* can_ptr) {
     // 电机限位保护
     if (
     _data->leg_date[0].q(0) > -1 && _data->leg_date[0].q(0) < 1.2 &&
-    _data->leg_date[0].q(1) > -1.5 && _data->leg_date[0].q(1) < 1.5 &&
+    _data->leg_date[0].q(1) > -1.7 && _data->leg_date[0].q(1) < 1.5 &&
     _data->leg_date[0].q(2) > 1 && _data->leg_date[0].q(2) < 2.6 &&
     _data->leg_date[1].q(0) > -1 && _data->leg_date[1].q(0) < 1.2 &&
-    _data->leg_date[1].q(1) > -1.5 && _data->leg_date[1].q(1) < 1.5 &&
+    _data->leg_date[1].q(1) > -1.7 && _data->leg_date[1].q(1) < 1.5 &&
     _data->leg_date[1].q(2) > 1 && _data->leg_date[1].q(2) < 2.6 &&
     _data->leg_date[2].q(0) > -1 && _data->leg_date[2].q(0) < 1.2 &&
-    _data->leg_date[2].q(1) > -1.5 && _data->leg_date[2].q(1) < 1.5 &&
+    _data->leg_date[2].q(1) > -1.7 && _data->leg_date[2].q(1) < 1.5 &&
     _data->leg_date[2].q(2) > 1 && _data->leg_date[2].q(2) < 2.6 &&
     _data->leg_date[3].q(0) > -1 && _data->leg_date[3].q(0) < 1.2 &&
-    _data->leg_date[3].q(1) > -1.5 && _data->leg_date[3].q(1) < 1.5 &&
+    _data->leg_date[3].q(1) > -1.7 && _data->leg_date[3].q(1) < 1.5 &&
     _data->leg_date[3].q(2) > 1 && _data->leg_date[3].q(2) < 2.6
         )
       {
@@ -205,6 +205,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.05;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已跑步:run" << std::endl;
         break;
 
@@ -214,6 +215,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.03;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已前进:ddd" << std::endl;
         break;
 
@@ -223,6 +225,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = -0.03;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已后退:fff" << std::endl;
         break;
     
@@ -232,6 +235,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已踏步:step" << std::endl;
         break;
 
@@ -241,6 +245,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.011;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已左转:" << std::endl;
         break;
     
@@ -250,6 +255,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.01;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+
         std::cout << "已右转:" << std::endl;
         break;
 
@@ -259,6 +265,7 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.0005;
         _data->trot_wide_r = -0.0005;
+
         std::cout << "左平移:" << std::endl;
         break;
     
@@ -268,8 +275,24 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = -0.0005;
         _data->trot_wide_r = 0.0005;
+
         std::cout << "右平移:" << std::endl;
         break;
+
+      case '8':
+        _data->lift_height = 0.15;    
+        std::cout << "上台阶:" << std::endl;
+        break;
+
+      case '5':
+        _data->lift_height = 0.10;    
+        std::cout << "正常高度:" << std::endl;
+        break;
+
+      case '2':
+        _data->lift_height = 0.05;    
+        std::cout << "下台阶:" << std::endl;
+        break;        
         }
     }
 

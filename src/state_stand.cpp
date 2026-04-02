@@ -3,9 +3,6 @@
 #include "state_stand.h"
 
 
-
-
-
 void State_Stand::onEnter(){
     std::cout << "State Stand onEnter" << std::endl;
     

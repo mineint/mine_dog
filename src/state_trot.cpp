@@ -66,7 +66,7 @@ void State_Trot::runState(){
         double t_stance = leg_phase / duty;
         t_stance = std::clamp(t_stance, 0.0, 1.0);
 
-        Eigen::Vector3d support_pDes = _data->swing_controller->generateBezier5Trajectory(t_stance, _data->last_touchdown_pos[leg], _data->next_foot_target[leg]);
+        Eigen::Vector3d support_pDes = _data->swing_controller->generateBezier5Trajectory(t_stance, _data->lift_height, _data->last_touchdown_pos[leg], _data->next_foot_target[leg]);
         Eigen::Vector3d nominal_pDes;
 
         
@@ -101,11 +101,11 @@ void State_Trot::runState(){
         // 存储力矩
         leg_torques[leg] = leg_tau; 
 
-        if (_data->tx_count % 10 == 0)
-        { 
-        std::cout << "SUPPORT:" << leg + 1 << std::endl;
-        std::cout << nominal_pDes << std::endl;
-        } 
+        // if (_data->tx_count % 10 == 0)
+        // { 
+        // std::cout << "SUPPORT:" << leg + 1 << std::endl;
+        // std::cout << nominal_pDes << std::endl;
+        // } 
 
         break;
         }
@@ -117,6 +117,7 @@ void State_Trot::runState(){
 
         auto leg_tau  = _data->swing_controller->computeSwingTorque(
             t_swing,           // 当前摆动进度 [0,1]
+            _data->lift_height, 
             _data->last_touchdown_pos[leg],         // 抬腿起点
             _data->next_foot_target[leg],           // 目标落地点
             _data->leg_date[leg].q, 
@@ -125,7 +126,7 @@ void State_Trot::runState(){
             _data->swing_kd
         );
 
-        Eigen::Vector3d p_des = _data->swing_controller->generateBezier5Trajectory(t_swing, _data->last_touchdown_pos[leg], _data->next_foot_target[leg]);
+        Eigen::Vector3d p_des = _data->swing_controller->generateBezier5Trajectory(t_swing, _data->lift_height, _data->last_touchdown_pos[leg], _data->next_foot_target[leg]);
 
         // 修正VMC力矩 
         const auto& signs = _data->leg_controller->leg_signs[leg];

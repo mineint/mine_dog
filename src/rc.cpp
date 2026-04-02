@@ -149,7 +149,7 @@ void USBRCReceiver::RC_thread_function() {
         t += std::chrono::microseconds(1000);
         
         readRCData();
-        std::cout << "RC_thread_function" << std::endl;
+        //std::cout << "RC_thread_function" << std::endl;
         
         std::this_thread::sleep_until(t);
     }

@@ -23,6 +23,7 @@ LegSwingController::LegSwingController(const Eigen::Vector3f& leg_lengths) {
 // 主计算函数 
 Eigen::Vector3d LegSwingController::computeSwingTorque(
     double t_normalized,
+    double lift_height_,
     const Eigen::Vector3d& start_pos,
     const Eigen::Vector3d& end_pos,
     const Eigen::Vector3d& q,
@@ -34,12 +35,12 @@ Eigen::Vector3d LegSwingController::computeSwingTorque(
     tx_count ++;
 
     // 1. 生成期望足端位置 & 速度（使用五次贝塞尔）
-    Eigen::Vector3d p_des = generateBezier5Trajectory(t_normalized, start_pos, end_pos);
+    Eigen::Vector3d p_des = generateBezier5Trajectory(t_normalized, lift_height_, start_pos, end_pos);
 
     // 粗略速度估计（前后两点差分）
     constexpr double dt = 0.001;
     double t_next = std::min(t_normalized + dt, 1.0);
-    Eigen::Vector3d p_next = generateBezier5Trajectory(t_next, start_pos, end_pos);
+    Eigen::Vector3d p_next = generateBezier5Trajectory(t_next,  lift_height_, start_pos, end_pos);
     Eigen::Vector3d v_des = (p_next - p_des) / dt;
 
     last_foot_pos_ = p_des;
@@ -80,6 +81,7 @@ Eigen::Vector3d LegSwingController::computeSwingTorque(
 // 五次贝塞尔轨迹
 Eigen::Vector3d LegSwingController::generateBezier5Trajectory(
     double t,
+    double lift_height_,
     const Eigen::Vector3d& start,
     const Eigen::Vector3d& end) const
 {

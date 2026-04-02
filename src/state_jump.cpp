@@ -4,11 +4,10 @@
 
 
 
-
-
 void State_Jump::onEnter(){
     std::cout << "State Jump onEnter" << std::endl;
-    double last_high = _data->start_high;
+    last_high = _data->start_high;
+    _data->j_timer = 0; 
 }
 
 void State_Jump::runState(){ 
@@ -79,7 +78,7 @@ void State_Jump::runState(){
         
     
 
-    if (_data->tx_count % 10 == 0)
+    if (_data->tx_count % 50 == 0)
             { 
             //std::cout << "j_timer:" << _data->j_timer << std::endl;
             //std::cout << "crouch_progress:" << crouch_progress << std::endl;
@@ -91,8 +90,8 @@ void State_Jump::runState(){
     LegCommand cmd;
     cmd.pDes   = jump_pDes;
     cmd.vDes   = Eigen::Vector3d::Zero();
-    cmd.kpCart = _data->leg_controller->stance_kp;         
-    cmd.kdCart = _data->leg_controller->stance_kd;
+    cmd.kpCart = _data->leg_controller->jump_kp;         
+    cmd.kdCart = _data->leg_controller->jump_kd;
 
     for (int leg = 0; leg < 4; ++leg) {  
  

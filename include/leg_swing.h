@@ -18,6 +18,7 @@ public:
     // 主接口：计算摆动相关节力矩
     Eigen::Vector3d computeSwingTorque(
         double t_normalized,                    // [0,1]
+        double lift_height_,
         const Eigen::Vector3d& start_pos,
         const Eigen::Vector3d& end_pos,
         const Eigen::Vector3d& q,
@@ -30,6 +31,7 @@ public:
     // 五次贝塞尔轨迹生成（速度连续，适合摆动腿）
     Eigen::Vector3d generateBezier5Trajectory(
         double t,
+        double lift_height_,
         const Eigen::Vector3d& start,
         const Eigen::Vector3d& end
     ) const;
@@ -45,7 +47,7 @@ private:
 
     std::unique_ptr<LegKinematics> kinematics_;
 
-    double lift_height_ = 0.10;  
+     
 
     mutable Eigen::Vector3d last_foot_pos_;
     mutable Eigen::Vector3d last_foot_vel_;
