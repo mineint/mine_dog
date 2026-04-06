@@ -34,6 +34,9 @@ struct FSM_Data {
     double trot_wide_r = 0;
     double trot_wide_l = 0;
     double lift_height = 0.10;  // 抬腿高度
+
+    double target_x[4]; 
+    double target_y[4]; 
     
     std::shared_ptr<Tangair_usb2can> can_ptr;
     std::shared_ptr<ImuReader> imu_ptr;

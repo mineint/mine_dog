@@ -18,6 +18,7 @@ LegSwingController::LegSwingController(const Eigen::Vector3f& leg_lengths) {
                     0.0f , 0.096f  , 0.0f ,
                     0.0f , 0.096f , 0.0f ;  
     _foot_positions_leg.Zero();
+
 }
 
 // 主计算函数 
@@ -120,6 +121,35 @@ Eigen::Vector3d LegSwingController::generateBezier5Trajectory(
 
     return b0 * p0 + b1 * p1 + b2 * p2 + b3 * p3 + b4 * p4 + b5 * p5;
 }
+
+// ICR算法
+void LegSwingController::ICR_compute(
+    int leg_id,
+    double rc_vx,
+    double rc_vy,
+    double rc_vw,
+    double& target_x,
+    double& target_y,
+    double stance_time) 
+    {
+    
+    rc_vx = std::clamp(rc_vx, -0.2, 0.2); // vx不要超过0.2
+    rc_vy = std::clamp(rc_vy, -0.002, 0.002); // vy不要超过0.002
+
+    ICR_vx[leg_id] = rc_vx - rc_vw * ICR_y[leg_id];
+    ICR_vy[leg_id] = rc_vy + rc_vw * ICR_x[leg_id];
+            
+    target_x = ICR_vx[leg_id] * (stance_time / 2.0);
+    double raw_target_y = ICR_vy[leg_id] * (stance_time / 2.0);
+
+    // 处理Y轴：右侧腿翻转符号
+    if (leg_id == 0 || leg_id == 2) {
+        target_y = raw_target_y;
+    } else {
+        target_y = -raw_target_y;
+    }
+    
+    }
 
 // Raibert落脚点算法
 Eigen::Vector3f LegSwingController::computeRaibertFootstep(

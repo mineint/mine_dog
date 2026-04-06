@@ -30,12 +30,15 @@ void State_Passive::runState(){
         std::cerr << "[Passive] can_ptr is null!\n";
         return;
     }
+    _data->tx_count++;
+    Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[1].q);
 
-    //  if (_data->tx_count % 100 == 0)
-    //         { 
+     if (_data->tx_count % 1000 == 0)
+            { 
             
-    //         std::cout << "start_high:" << _data->start_high << std::endl;
-    //         } 
+            std::cout << "foot_pos:" << foot_pos << std::endl;
+            std::cout << "tx_count:" << _data->tx_count << std::endl;
+            } 
 
     _data->leg_controller->sendZeroTorques(_data->can_ptr.get()); 
 

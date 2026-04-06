@@ -55,8 +55,15 @@ void State_Trot::runState(){
             _data->next_foot_target[leg] = destination_pDes_r;
         }
         
+    _data->swing_controller->ICR_compute(leg, 0, 0, 0.1, _data->target_x[leg], _data->target_y[leg], 0.5);
+    // stance_time给固定值，调整步态是注意修改
     
-
+    
+    if (_data->tx_count % 10 == 0)
+        { 
+        std::cout << "target_x" << leg + 1 << ":" <<  _data->target_x[leg] << std::endl;
+        std::cout << "target_y" << leg + 1 << ":" << _data->target_y[leg] << std::endl;
+        } 
         
     switch (phase)
     {
@@ -137,11 +144,11 @@ void State_Trot::runState(){
         // 存储力矩
         leg_torques[leg] = leg_tau;
             
-        if (_data->tx_count % 10 == 0)
-        { 
-        std::cout << "SWING:" << leg + 1 << std::endl;
-        std::cout << p_des << std::endl;
-        } 
+        // if (_data->tx_count % 10 == 0)
+        // { 
+        // std::cout << "SWING:" << leg + 1 << std::endl;
+        // std::cout << p_des << std::endl;
+        // } 
 
             break;
         }

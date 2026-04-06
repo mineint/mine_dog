@@ -52,7 +52,7 @@ void GaitScheduler::configureGaitParameters() {
 
         case GaitType::TROT:
             cycle_time_   = 1.00;  
-            duty_factor_  = 0.50;
+            duty_factor_  = 0.50;   // stance_time = 0.5
             phase_offsets_ = {0.00, 0.50, 0.50, 0.00};  // 对角腿同步
             break;
     }

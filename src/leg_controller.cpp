@@ -153,20 +153,20 @@ void LegController::sendZeroTorques(Tangair_usb2can* can_ptr) {
     }
 
    
-    can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.kd = 3;
-    can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.kd = 3;
+    can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.kd = 2;
+    can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_1.ID_1_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.kd = 2;
 
-    can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.kd = 3;
-    can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.kd = 3;
+    can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.kd = 2;
+    can_ptr->USB2CAN0_CAN_Bus_2.ID_2_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_1.ID_2_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.kd = 2;
 
-    can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.kd = 3;
-    can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.kd = 3;
-    can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.kd = 3; 
+    can_ptr->USB2CAN0_CAN_Bus_1.ID_3_motor_send.kd = 2;
+    can_ptr->USB2CAN0_CAN_Bus_2.ID_3_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_1.ID_3_motor_send.kd = 2;
+    can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.kd = 2; 
 
     can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque = 0;
     can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque = 0;

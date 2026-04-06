@@ -199,6 +199,7 @@ void FSM::update(double dt) {
         std::cout << "已起立:up" << std::endl;
         break;
 
+        
       case 'r':
       case 'R':
         _data->trot_long_l = 0.05;

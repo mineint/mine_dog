@@ -36,6 +36,17 @@ public:
         const Eigen::Vector3d& end
     ) const;
 
+    void ICR_compute(
+        int leg_id,
+        double rc_vx,
+        double rc_vy,
+        double rc_vw,
+        double& target_x,
+        double& target_y,
+        double stance_time
+    );
+
+
     Eigen::Vector3f computeRaibertFootstep(
     int leg_id,
     Eigen::Vector3f desired_velocity,
@@ -61,8 +72,13 @@ private:
     Eigen::Matrix<float, 4, 3> _foot_positions_body; // 足端位置 
     Eigen::Matrix<float, 4, 3> _foot_offset;// 足端位置在世界坐标系下
     Eigen::Matrix<float, 4, 3> _foot_positions_leg; // 足端位置在单腿坐标系下 [4x3]
-    
-    
+
+    double ICR_x[4] = {0.15505, 0.15505, -0.15505, -0.15505};
+    double ICR_y[4] = {0.209, -0.209, 0.209, -0.209};
+
+    double ICR_vx[4];
+    double ICR_vy[4];
+
     
     // 逆运动学
     Eigen::Vector3d inverseKinematics(const Eigen::Vector3d& p) const;
