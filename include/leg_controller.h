@@ -38,16 +38,19 @@ public:
 }};
     
     // VMC相关系数
-    Eigen::Vector3d trot_kp{50, 50, 50};
-    Eigen::Vector3d trot_kd{1, 1, 1};
-    //Eigen::Vector3d trot_kp{1500, 1500, 2000};
-    //Eigen::Vector3d trot_kd{30, 30, 30}; 
-    // Eigen::Vector3d stance_kp{1000, 1000, 1333};
-    // Eigen::Vector3d stance_kd{20, 20, 20};
+    Eigen::Vector3d trot_kp{1500, 1500, 2000};
+    Eigen::Vector3d trot_kd{30, 30, 30};
+    Eigen::Vector3d swing_kp{1500, 1500, 2000};
+    Eigen::Vector3d swing_kd{30, 30, 30};
+    // Eigen::Vector3d stance_kp{500, 500, 500};
+    // Eigen::Vector3d stance_kd{10, 10, 10};
+    // Eigen::Vector3d trot_kp{1500, 1500, 2000};
+    // Eigen::Vector3d trot_kd{30, 30, 30}; 
+    Eigen::Vector3d stance_kp{1000, 1000, 1333};
+    Eigen::Vector3d stance_kd{20, 20, 20};
     Eigen::Vector3d jump_kp{500, 500, 500};
     Eigen::Vector3d jump_kd{10, 10, 10};
-    Eigen::Vector3d stance_kp{50, 50, 50};
-    Eigen::Vector3d stance_kd{1, 1, 1};
+    
 
 
     Eigen::Vector3d update_filter(Eigen::Vector3d current_v) {

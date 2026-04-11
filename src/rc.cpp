@@ -116,22 +116,25 @@ bool USBRCReceiver::parsePacket(const uint8_t* packet, RCData& data) {
  
     // 先读取float值，然后转换为int
     float temp_float;
-    memcpy(&temp_float, packet + 3, sizeof(float));
-    data.Left_X = static_cast<int>(temp_float);
+    // memcpy(&temp_float, packet + 3, sizeof(float));
+    // data.Left_X = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, packet + 4, sizeof(float));
-    data.Left_Y = static_cast<int>(temp_float);
+    // memcpy(&temp_float, packet + 4, sizeof(float));
+    // data.Left_Y = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, packet + 5, sizeof(float));
-    data.Right_X = static_cast<int>(temp_float);
+    // memcpy(&temp_float, packet + 5, sizeof(float));
+    // data.Right_X = static_cast<int>(temp_float);
     
-    memcpy(&temp_float, packet + 6, sizeof(float));
-    data.Right_Y = static_cast<int>(temp_float);
-    
+    // memcpy(&temp_float, packet + 6, sizeof(float));
+    // data.Right_Y = static_cast<int>(temp_float);
+    data.CH1 = packet[3];
+    data.CH2 = packet[4];
+    data.CH3 = packet[5];
+    data.CH4 = packet[6];
     data.S1 = packet[7];
     data.S2 = packet[8];
-    data.A = packet[9];
-    data.B = packet[10];
+    data.S3 = packet[9];
+    data.S4 = packet[10];
     
     return true;
 }
@@ -149,8 +152,11 @@ void USBRCReceiver::RC_thread_function() {
         t += std::chrono::microseconds(1000);
         
         readRCData();
-        //std::cout << "RC_thread_function" << std::endl;
-        
+        /* for (int i = 0; i < recv_len; ++i) {
+        // 以十六进制格式打印每个字节
+        printf("%02X ", (unsigned char)recv_buf[i]);
+    } */
+       
         std::this_thread::sleep_until(t);
     }
 }
@@ -166,12 +172,13 @@ bool USBRCReceiver::readRCData() {
         // 查找包头
         while (recv_len >= PACKET_SIZE) {
             int idx = findPacketHeader(recv_buf, recv_len);
+           
             if (idx >= 0 && recv_len - idx >= PACKET_SIZE) {
                 // 检查包尾
+                
                 if (memcmp(recv_buf + idx + PACKET_SIZE - 2, PACKET_TAIL, 2) == 0) {
                     // 解析数据
                     parsePacket(recv_buf + idx, _RCData);
-                    
 
                     // 移除已处理数据
                     int remain = recv_len - (idx + PACKET_SIZE);
@@ -182,6 +189,7 @@ bool USBRCReceiver::readRCData() {
                     // 包尾错误，丢弃这个包头开始的部分数据，避免死循环
                     memmove(recv_buf, recv_buf + idx + 1, recv_len - idx - 1);
                     recv_len -= (idx + 1);
+                    
                 }
             } else if (idx < 0) {
                 // 包头没找到，清理数据，避免缓冲区溢出

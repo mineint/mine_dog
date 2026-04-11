@@ -25,7 +25,9 @@ struct FSM_Data {
     double timer = 0;        // 站立计时
     double j_timer = 0;        // 跳跃计时
     std::string command;     // 模式转换标志
-    double start_high = -0.06;
+    double start_high = -0.12;
+    double last_high = -0.12;
+    double set_high = -0.27;
     double jump_long = 0.00;   
     double trot_long = 0;
     double trot_long_r = 0;
@@ -33,7 +35,11 @@ struct FSM_Data {
     double trot_wide = 0;
     double trot_wide_r = 0;
     double trot_wide_l = 0;
-    double lift_height = 0.10;  // 抬腿高度
+    double lift_height = 0.05;  // 抬腿高度
+
+    double rc_vx;
+    double rc_vy;
+    double rc_vw;
 
     double target_x[4]; 
     double target_y[4]; 
@@ -58,11 +64,14 @@ struct FSM_Data {
     Eigen::Vector3d next_foot_target[4];
 
      
-    //Eigen::Vector3d swing_kp{20, 24, 24};
-    //Eigen::Vector3d swing_kd{1, 1.2, 1.2};
+    // Eigen::Vector3d swing_kp{20, 24, 24};
+    // Eigen::Vector3d swing_kd{1, 1.2, 1.2};
 
-    Eigen::Vector3d swing_kp{3, 3, 3};
-    Eigen::Vector3d swing_kd{0.15, 0.15, 0.15};
+    // Eigen::Vector3d swing_kp{20, 24, 24};
+    // Eigen::Vector3d swing_kd{1, 1.2, 1.2};
+
+    Eigen::Vector3d swing_kp{10, 10, 10};
+    Eigen::Vector3d swing_kd{0.5, 0.5, 0.5};
 
     uint32_t tx_count = 0;
   

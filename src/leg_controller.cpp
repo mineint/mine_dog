@@ -48,7 +48,7 @@ Eigen::Vector3d LegController::vmc_control(
  
     Eigen::Vector3d tau = J.transpose() * F_desired; 
  
-    const double tau_max = 15.0; 
+    const double tau_max = 10.0; 
     tau = tau.cwiseMin(tau_max).cwiseMax(-tau_max);
 
     
@@ -80,10 +80,10 @@ void LegController::sendJointTorques(Tangair_usb2can* can_ptr,
         &can_ptr->USB2CAN1_CAN_Bus_2   // 右后腿 (RH)
     };
 
-    const float MAX_TORQUE = 15.0f;  // 电机最大力矩
+    const float MAX_TORQUE = 10.0f;  // 电机最大力矩
 
-    //for (int leg = 0; leg < 4; ++leg) {
-        Eigen::Vector3f tau = desired_torques.segment<3>(1 * 3).cast<float>();
+    for (int leg = 0; leg < 4; ++leg) {
+        Eigen::Vector3f tau = desired_torques.segment<3>(leg * 3).cast<float>();
       
         // 限幅 + deadzone
         for (int j = 0; j < 3; ++j) {
@@ -92,7 +92,7 @@ void LegController::sendJointTorques(Tangair_usb2can* can_ptr,
         }
 
         // 填充到对应 CAN 总线
-        auto* bus = buses[1];
+        auto* bus = buses[leg];
         bus->ID_1_motor_send.torque = tau(0);  // abad
         bus->ID_2_motor_send.torque = tau(1);  // hip
         bus->ID_3_motor_send.torque = tau(2);  // knee 
@@ -109,7 +109,7 @@ void LegController::sendJointTorques(Tangair_usb2can* can_ptr,
         // std::cout << "tau10:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_1_motor_send.torque << std::endl;
         // std::cout << "tau11:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_2_motor_send.torque << std::endl;
         // std::cout << "tau12:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque << std::endl;  
-   //}  
+   }  
     
     // can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -1;
     // 测试力矩

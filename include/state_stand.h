@@ -14,5 +14,11 @@ public:
     FSM_StateName checkTransition() override;
 
     void onExit() override;
+
+    double progress;
+    double smooth_step;
+    double torques_progress;
+    double torques_smooth_step;
+    
 };
 

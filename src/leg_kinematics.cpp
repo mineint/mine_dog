@@ -101,12 +101,7 @@ Eigen::Vector3d LegKinematics::inverseKinematics(const Eigen::Vector3d& p,
     double R = std::sqrt(r_sq - L1_sq);
     
     // 根据 FK: y = L1*cos(q1) + R*sin(q1), z = L1*sin(q1) - R*cos(q1)
-    // 这是一个典型的辅助角公式 A*sin(x) + B*cos(x) = C
-    // 解法：q_abad = atan2(z, y) + atan2(R, L1) 
-    // 或者用几何法：
-    double q_abad = std::atan2(p.z(), p.x()) ; // 这行逻辑需要对齐你的坐标系定义
-    // 精确匹配你给出的 FK 的解：
-    q_abad = std::atan2(p.z() * L1 + p.y() * R, p.y() * L1 - p.z() * R);
+    double q_abad = std::atan2(p.z() * L1 + p.y() * R, p.y() * L1 - p.z() * R);
 
     // --- 2. 计算 q_knee ---
     // 在腿部转动平面内，目标点的有效坐标为 (x, R)

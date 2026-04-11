@@ -37,7 +37,7 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can, std::shared_ptr<ImuReader> imu) {
     for (int i = 0; i < 4; ++i) {
         _data->leg_date[i] = Leg_Date();
     }
-
+    _data->leg_controller->sendZeroTorques(_data->can_ptr.get());
     current_state_ = std::make_unique<State_Passive>(_data.get());
 }
 
@@ -136,10 +136,10 @@ void FSM::update_imu(ImuReader* imu_ptr) {
 }
 
 void FSM::update(double dt) {
-     if (!_data || !_data.get() || !current_state_) {
-        std::cerr << "[FSM] update: invalid state or data\n";
-        return;
-    }
+    //  if (!_data || !_data.get() || !current_state_) {
+    //     std::cerr << "[FSM] update: invalid state or data\n";
+    //     return;
+    // }
 
     _data.get()->dt = dt;
 
@@ -188,14 +188,17 @@ void FSM::update(double dt) {
         break;
       case 'd':
       case 'D':
-        _data->start_high = -0.18;
-        
+        _data->last_high = _data->set_high;
+        _data->set_high = -0.20;
+        _data->timer = 1.0;
         std::cout << "已趴下:down" << std::endl;
         break;
     
       case 'u':
       case 'U':
-        _data->start_high = -0.28;
+        _data->last_high = _data->set_high;
+        _data->set_high = -0.28;
+        _data->timer = 1.0;
         std::cout << "已起立:up" << std::endl;
         break;
 
@@ -206,6 +209,9 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.05;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = 0.2;
+        _data->rc_vy = 0;
+        _data->rc_vw = 0;
 
         std::cout << "已跑步:run" << std::endl;
         break;
@@ -216,6 +222,9 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.03;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = 0.1;
+        _data->rc_vy = 0;
+        _data->rc_vw = 0;
 
         std::cout << "已前进:ddd" << std::endl;
         break;
@@ -226,6 +235,9 @@ void FSM::update(double dt) {
         _data->trot_long_r = -0.03;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = -0.1;
+        _data->rc_vy = 0;
+        _data->rc_vw = 0;
 
         std::cout << "已后退:fff" << std::endl;
         break;
@@ -236,26 +248,35 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = 0;
+        _data->rc_vy = 0;
+        _data->rc_vw = 0;
 
         std::cout << "已踏步:step" << std::endl;
         break;
 
       case 'l':
       case 'L':
-        _data->trot_long_l = 0.01;
-        _data->trot_long_r = 0.011;
+        _data->trot_long_l = 0.00;
+        _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = 0;
+        _data->rc_vy = 0;
+        _data->rc_vw = 0.3;
 
         std::cout << "已左转:" << std::endl;
         break;
     
       case ';':
       case ':':
-        _data->trot_long_l = 0.011;
-        _data->trot_long_r = 0.01;
+        _data->trot_long_l = 0.00;
+        _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.00;
         _data->trot_wide_r = 0.00;
+        _data->rc_vx = 0;
+        _data->rc_vy = 0;
+        _data->rc_vw = -0.3;
 
         std::cout << "已右转:" << std::endl;
         break;
@@ -266,6 +287,9 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = 0.0005;
         _data->trot_wide_r = -0.0005;
+        _data->rc_vx = 0;
+        _data->rc_vy = 0.08;
+        _data->rc_vw = 0;
 
         std::cout << "左平移:" << std::endl;
         break;
@@ -276,6 +300,9 @@ void FSM::update(double dt) {
         _data->trot_long_r = 0.00;
         _data->trot_wide_l = -0.0005;
         _data->trot_wide_r = 0.0005;
+        _data->rc_vx = 0;
+        _data->rc_vy = -0.08;
+        _data->rc_vw = 0;
 
         std::cout << "右平移:" << std::endl;
         break;

@@ -134,19 +134,19 @@ int main() {
     // 主循环 (低频监控)
     std::cout << "[Main] System running. Press Ctrl+C to stop.\n";
     while (!should_exit.load()) {
-        //  std::cout << "RC Data - CH0: " << USBRC_ptr->_RCData.Left_X
-        //               << ", CH1: " << USBRC_ptr->_RCData.Left_Y
-        //               << ", CH2: " << USBRC_ptr->_RCData.Right_X
-        //               << ", CH3: " << USBRC_ptr->_RCData.Right_Y
-        //               << ", S1: " << (int)USBRC_ptr->_RCData.S1 
-        //               << ", S2: " << (int)USBRC_ptr->_RCData.S2 
-        //               << ", A: " << (int)USBRC_ptr->_RCData.A
-        //               << ", B: " << (int)USBRC_ptr->_RCData.B
-        //               << "\n"; 
+         std::cout << "RC Data - CH0: " << (int)USBRC_ptr->_RCData.CH1
+                      << ", CH1: " << (int)USBRC_ptr->_RCData.CH2
+                      << ", CH2: " << (int)USBRC_ptr->_RCData.CH3
+                      << ", CH3: " << (int)USBRC_ptr->_RCData.CH4
+                      << ", S1: " << (int)USBRC_ptr->_RCData.S1 
+                      << ", S2: " << (int)USBRC_ptr->_RCData.S2 
+                      << ", S3: " << (int)USBRC_ptr->_RCData.S3
+                      << ", S4: " << (int)USBRC_ptr->_RCData.S4
+                      << "\n"; 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    // 优雅退出流程
+    // 退出流程
     std::cout << "[Main] Starting graceful shutdown...\n";
     
     // 第一步：停止控制线程（它会负责发送 DISABLE 指令）

@@ -54,6 +54,9 @@ public:
     float swing_time,
     float step_height/* ,
     bool closed_gyro_z */);
+
+    // 逆运动学
+    Eigen::Vector3d inverseKinematics(const Eigen::Vector3d& p) const;
 private:
 
     std::unique_ptr<LegKinematics> kinematics_;
@@ -80,6 +83,5 @@ private:
     double ICR_vy[4];
 
     
-    // 逆运动学
-    Eigen::Vector3d inverseKinematics(const Eigen::Vector3d& p) const;
+    
 };

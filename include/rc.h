@@ -5,14 +5,14 @@
 
 // RC数据结构
 struct RCData {
-    int Left_X;
-    int Left_Y;
-    int Right_X;
-    int Right_Y;
+    uint8_t CH1;
+    uint8_t CH2;
+    uint8_t CH3;
+    uint8_t CH4;
     uint8_t S1;
     uint8_t S2;
-    uint8_t A;
-    uint8_t B;
+    uint8_t S3;
+    uint8_t S4;
 };
 
 // USB RC接收器类
@@ -21,8 +21,8 @@ private:
     // 包定义
     static const uint8_t PACKET_HEADER[2];
     static const uint8_t PACKET_TAIL[2];
-    static const int PACKET_SIZE = 24;
-    static const int DATA_LEN = 20;
+    static const int PACKET_SIZE = 15;
+    static const int DATA_LEN = 10;
     static const int BUFFER_SIZE = 256;
 
     int fd;                              // 串口文件描述符

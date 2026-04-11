@@ -134,7 +134,7 @@ void LegSwingController::ICR_compute(
     {
     
     rc_vx = std::clamp(rc_vx, -0.2, 0.2); // vx不要超过0.2
-    rc_vy = std::clamp(rc_vy, -0.002, 0.002); // vy不要超过0.002
+    rc_vy = std::clamp(rc_vy, -0.08, 0.08); // vy不要超过0.08
 
     ICR_vx[leg_id] = rc_vx - rc_vw * ICR_y[leg_id];
     ICR_vy[leg_id] = rc_vy + rc_vw * ICR_x[leg_id];
@@ -142,11 +142,11 @@ void LegSwingController::ICR_compute(
     target_x = ICR_vx[leg_id] * (stance_time / 2.0);
     double raw_target_y = ICR_vy[leg_id] * (stance_time / 2.0);
 
-    // 处理Y轴：右侧腿翻转符号
+    // 处理Y轴：左侧腿翻转符号
     if (leg_id == 0 || leg_id == 2) {
-        target_y = raw_target_y;
-    } else {
         target_y = -raw_target_y;
+    } else {
+        target_y = raw_target_y;
     }
     
     }
