@@ -134,16 +134,16 @@ int main() {
     // 主循环 (低频监控)
     std::cout << "[Main] System running. Press Ctrl+C to stop.\n";
     while (!should_exit.load()) {
-         std::cout << "RC Data - CH0: " << (int)USBRC_ptr->_RCData.CH1
-                      << ", CH1: " << (int)USBRC_ptr->_RCData.CH2
-                      << ", CH2: " << (int)USBRC_ptr->_RCData.CH3
-                      << ", CH3: " << (int)USBRC_ptr->_RCData.CH4
-                      << ", S1: " << (int)USBRC_ptr->_RCData.S1 
-                      << ", S2: " << (int)USBRC_ptr->_RCData.S2 
-                      << ", S3: " << (int)USBRC_ptr->_RCData.S3
-                      << ", S4: " << (int)USBRC_ptr->_RCData.S4
-                      << "\n"; 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        //  std::cout << "RC Data - CH0: " << (float)USBRC_ptr->_RCData.CH1
+        //               << ", CH1: " << (float)USBRC_ptr->_RCData.CH2
+        //               << ", CH2: " << (float)USBRC_ptr->_RCData.CH3
+        //               << ", CH3: " << (float)USBRC_ptr->_RCData.CH4
+        //               << ", S1: " << (int)USBRC_ptr->_RCData.S1 
+        //               << ", S2: " << (int)USBRC_ptr->_RCData.S2 
+        //               << ", S3: " << (int)USBRC_ptr->_RCData.S3
+        //               << ", S4: " << (int)USBRC_ptr->_RCData.S4
+        //               << "\n"; 
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     // 退出流程

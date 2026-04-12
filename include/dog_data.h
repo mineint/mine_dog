@@ -5,6 +5,7 @@
 #include "leg_kinematics.h"
 #include "leg_swing.h"
 #include "imu_reader.h"
+#include "rc.h"
 
 struct Leg_Date
 {
@@ -19,6 +20,17 @@ struct IMU_Date
 	float yaw;
 };
 
+struct RC_Date
+{
+    float CH1;
+    float CH2;
+    float CH3;
+    float CH4;
+    float S1;
+    float S2;
+    float S3;
+    float S4;
+};
 
 struct FSM_Data {
     double controlMode;      // 控制模式
@@ -50,11 +62,12 @@ struct FSM_Data {
     std::unique_ptr<LegController> leg_controller;
     std::unique_ptr<LegKinematics> kinematics;   
     std::unique_ptr<LegSwingController> swing_controller;
-    std::unique_ptr<ImuReader> imu_reader;
+    std::unique_ptr<USBRCReceiver> rc_ptr;
+
     Leg_Date leg_date[4];
     LegController legs_filter[4];   //专门用于处理滤波
     IMU_Date imu_data;
-
+    RC_Date rc_data;
 
     
 

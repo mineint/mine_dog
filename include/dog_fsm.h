@@ -49,6 +49,8 @@ public:
 
     void update_imu(ImuReader* imu_ptr);
 
+    void update_RC(USBRCReceiver* rc_ptr);
+
     // 数据访问
     FSM_Data* getData() { return _data.get(); }
     const FSM_Data* getData() const { return _data.get(); }
@@ -58,5 +60,8 @@ public:
 private:
     std::unique_ptr<FSM_Data> _data;
     std::unique_ptr<FSM_State> current_state_;  
+
+    float last_S2 = 1;
+    float last_S3 = 1;
 };
 

@@ -41,12 +41,12 @@ void State_Stand::runState(){
     
     
 
-    // if (_data->tx_count % 100 == 0)
-    //         { 
+    if (_data->tx_count % 100 == 0)
+            { 
             
-    //         std::cout << "start_high:" << _data->start_high << std::endl;
-    //         std::cout << "timer:" << _data->timer << std::endl;
-    //         }
+            std::cout << "start_high:" << _data->start_high << std::endl;
+            std::cout << "timer:" << _data->timer << std::endl;
+            }
         
     // VMC相关参数
     LegCommand cmd;
@@ -66,7 +66,7 @@ void State_Stand::runState(){
         // std::cout << "target_y" << leg + 1 << ":" << _data->target_y[leg] << std::endl;
 
         // std::cout << leg + 1 << ":" <<  foot_pos << std::endl;
-        std::cout << "torques_smooth_step: " <<  torques_smooth_step << std::endl;
+        // std::cout << "torques_smooth_step: " <<  torques_smooth_step << std::endl;
 
         } 
     Eigen::Matrix3d J = _data->kinematics->computeJacobian(_data->leg_date[leg].q);

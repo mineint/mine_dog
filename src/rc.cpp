@@ -117,16 +117,16 @@ bool USBRCReceiver::parsePacket(const uint8_t* packet, RCData& data) {
     // 先读取float值，然后转换为int
     float temp_float;
     // memcpy(&temp_float, packet + 3, sizeof(float));
-    // data.Left_X = static_cast<int>(temp_float);
+    // data.CH1 = static_cast<int>(temp_float);
     
     // memcpy(&temp_float, packet + 4, sizeof(float));
-    // data.Left_Y = static_cast<int>(temp_float);
+    // data.CH2 = static_cast<int>(temp_float);
     
     // memcpy(&temp_float, packet + 5, sizeof(float));
-    // data.Right_X = static_cast<int>(temp_float);
+    // data.CH3 = static_cast<int>(temp_float);
     
     // memcpy(&temp_float, packet + 6, sizeof(float));
-    // data.Right_Y = static_cast<int>(temp_float);
+    // data.CH4 = static_cast<int>(temp_float);
     data.CH1 = packet[3];
     data.CH2 = packet[4];
     data.CH3 = packet[5];
