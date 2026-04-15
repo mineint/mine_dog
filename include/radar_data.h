@@ -4,28 +4,24 @@
 #include <thread>
 
 // RC数据结构
-struct RCData
+struct RadarData
 {
-    uint8_t CH1;
-    uint8_t CH2;
-    uint8_t CH3;
-    uint8_t CH4;
-    uint8_t S1;
-    uint8_t S2 = 1;
-    uint8_t S3 = 1;
-    uint8_t S4;
+    int16_t x_pos;
+    int16_t y_pos;
+    int16_t z_pos;
+    int16_t yaw_pos;
 };
 
 // USB RC接收器类
-class USBRCReceiver
+class RadarReceiver
 {
 private:
     // 包定义
-    static const uint8_t PACKET_HEADER[2];
-    static const uint8_t PACKET_TAIL[2];
-    static const int PACKET_SIZE = 15;
-    static const int DATA_LEN = 10;
-    static const int BUFFER_SIZE = 15;
+    static const uint8_t RADAE_HEADER[1];
+    static const uint8_t RADAE_TAIL[1];
+    static const int RADAE_SIZE = 10;
+    static const int DATA_LEN = 8;
+    static const int BUFFER_SIZE = 10;
 
     int fd;                        // 串口文件描述符
     uint8_t recv_buf[BUFFER_SIZE]; // 接收缓冲区
@@ -39,21 +35,21 @@ private:
     int findPacketHeader(const uint8_t *buf, int len);
 
     // 解析数据包
-    bool parsePacket(const uint8_t *packet, RCData &data);
+    bool parseRadar(const uint8_t* radar, RadarData& data);
 
     // RC线程函数
     void RC_thread_function();
 
-    const char *Device = "/dev/ttyACM2";
+    const char *Device = "/dev/ttyUSB0";
 
 public:
     // 构造函数
-    explicit USBRCReceiver();
+    explicit RadarReceiver();
 
     // 析构函数
-    ~USBRCReceiver();
+    ~RadarReceiver();
 
-    RCData _RCData{};
+    RadarData _RadarData{};
 
     std::thread _RC_thread;
     bool running_ = true;
@@ -62,8 +58,8 @@ public:
     // 初始化连接
     bool initialize();
 
-    // 读取RC数据
-    bool readRCData();
+    // 读取雷达数据
+    bool readRadarData();
 
     // 关闭连接
     void close();

@@ -36,6 +36,7 @@ add_executable(can_node
   src/KeyboardReader.cpp
   src/imu_data.c
   src/imu_reader.cpp
+  src/radar_data.cpp
 )
 
 # 为目标单独添加包含目录（更推荐的方式）

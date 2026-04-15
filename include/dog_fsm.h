@@ -51,6 +51,8 @@ public:
 
     void update_RC(USBRCReceiver* rc_ptr);
 
+    void update_radar(RadarReceiver *radar_ptr);
+
     // 数据访问
     FSM_Data* getData() { return _data.get(); }
     const FSM_Data* getData() const { return _data.get(); }

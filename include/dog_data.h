@@ -6,6 +6,7 @@
 #include "leg_swing.h"
 #include "imu_reader.h"
 #include "rc.h"
+#include "radar_data.h"
 
 struct Leg_Date
 {
@@ -32,6 +33,13 @@ struct RC_Date
     float S4;
 };
 
+struct Radar_Data
+{
+    int16_t x_pos;
+    int16_t y_pos;
+    int16_t z_pos;
+    int16_t yaw_pos;
+};
 struct FSM_Data {
     double controlMode;      // 控制模式
     double timer = 0;        // 站立计时
@@ -63,12 +71,13 @@ struct FSM_Data {
     std::unique_ptr<LegKinematics> kinematics;   
     std::unique_ptr<LegSwingController> swing_controller;
     std::unique_ptr<USBRCReceiver> rc_ptr;
+    std::unique_ptr<RadarReceiver> radar_ptr;
 
     Leg_Date leg_date[4];
     LegController legs_filter[4];   //专门用于处理滤波
     IMU_Date imu_data;
     RC_Date rc_data;
-
+    Radar_Data radar_data;
     
 
     

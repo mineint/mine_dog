@@ -8,6 +8,7 @@
 #include "gait_scheduler.h"
 #include "imu_reader.h"
 
+
 // 采用单腿局部坐标系一致性，向外为正
 
 // 电机方向修正
@@ -26,6 +27,7 @@ FSM::FSM(std::shared_ptr<Tangair_usb2can> can, std::shared_ptr<ImuReader> imu)
   _data->can_ptr = can;
   _data->imu_ptr = imu;
   _data->rc_ptr = std::make_unique<USBRCReceiver>();
+  _data->radar_ptr = std::make_unique<RadarReceiver>();
   _data->leg_controller = std::make_unique<LegController>();
   _data->kinematics = std::make_unique<LegKinematics>(Eigen::Vector3f(0.096f, 0.21f, 0.21f));
   _data->swing_controller = std::make_unique<LegSwingController>();
@@ -143,6 +145,19 @@ void FSM::update_RC(USBRCReceiver *rc_ptr)
   // std::cout << "S2: " << _data->rc_data.S2 << std::endl;
   // std::cout << "S3: " << _data->rc_data.S3 << std::endl;
   // std::cout << "S4: " << _data->rc_data.S4 << std::endl;
+}
+
+void FSM::update_radar(RadarReceiver *radar_ptr)
+{
+  _data->radar_data.x_pos = radar_ptr->_RadarData.x_pos;
+  _data->radar_data.y_pos = radar_ptr->_RadarData.y_pos;
+  _data->radar_data.z_pos = radar_ptr->_RadarData.z_pos;
+  _data->radar_data.yaw_pos = radar_ptr->_RadarData.yaw_pos;
+
+  // std::cout << "x_pos: " << _data->radar_data.x_pos << std::endl;
+  // std::cout << "y_pos: " << _data->radar_data.y_pos << std::endl;
+  // std::cout << "z_pos: " << _data->radar_data.z_pos << std::endl;
+  // std::cout << "yaw_pos: " << _data->radar_data.yaw_pos << std::endl;
 }
 
 void FSM::update_imu(ImuReader *imu_ptr)

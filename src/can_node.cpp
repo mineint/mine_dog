@@ -18,6 +18,7 @@
 #include "state_stand.h"
 #include "imu_data.h"
 #include "rc.h"
+#include "radar_data.h"
 
 // 全局标志位
 std::atomic<bool> should_exit{false};
@@ -123,7 +124,8 @@ int main() {
     auto IMU_ptr = std::make_shared<ImuReader>();
     auto FSM_ptr = std::make_shared<FSM>(CAN_ptr, IMU_ptr); 
     auto ConFSM_ptr = std::make_shared<ControlFSM>(FSM_ptr, CAN_ptr);
-    auto USBRC_ptr = std::make_shared<USBRCReceiver>();
+    //auto USBRC_ptr = std::make_shared<USBRCReceiver>();
+    //auto Radar_ptr = std::make_shared<RadarReceiver>();
     //auto ConFSM_ptr = std::make_shared<ControlFSM>(CAN_ptr);
 
 
