@@ -16,6 +16,7 @@ sudo cp usb_can.rules /etc/udev/rules.d/
 sudo udevadm trigger
 ```
 
+编译流程
 ```bash
 mkdir build
 ```
