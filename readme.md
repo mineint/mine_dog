@@ -16,13 +16,21 @@ sudo cp usb_can.rules /etc/udev/rules.d/
 sudo udevadm trigger
 ```
 
-
+```bash
 mkdir build
+```
+```bash
 cmake -S . -B build
+```
+```bash
 cd build
-make   （cmake --build build）
-                 cd /home/mine/USB2CAN-Demo-Lingzu/build
+```
+```bash
+make
+```
+```bash
 ./can_node
+```
 
 
 
