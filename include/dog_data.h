@@ -47,7 +47,7 @@ struct FSM_Data {
     std::string command;     // 模式转换标志
     double start_high = -0.12;
     double last_high = -0.12;
-    double set_high = -0.27;
+    double set_high = -0.28;
     double jump_long = 0.00;   
     double trot_long = 0;
     double trot_long_r = 0;

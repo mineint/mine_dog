@@ -32,8 +32,10 @@ make
 ```bash
 ./can_node
 ```
-
-
+mkdir build
+cmake -S . -B build
+cd build
+make
 
 sudo usermod -a -G dialout $USER
 

@@ -197,65 +197,65 @@ void FSM::update(double dt)
   // 执行当前状态的核心行为
   current_state_->runState();
 
-  if (_data->rc_data.S2 == 1)
-  {
-    _data->command = "passive";
-    // std::cout << "切换到被动模式" << std::endl;
-  }
-  else if (_data->rc_data.S2 == 0)
-  {
-    _data->command = "stand";
-    // std::cout << "切换到站立模式" << std::endl;
-    if (_data->rc_data.S3 != last_S3)
-    {
-      if (_data->rc_data.S3 == 0)
-      {
-        _data->last_high = _data->set_high;
-        _data->set_high = -0.18;
-        _data->timer = 1.0;
-        std::cout << "已趴下:down" << std::endl;
-      }
-      else if (_data->rc_data.S3 == 1)
-      {
-        _data->last_high = _data->set_high;
-        _data->set_high = -0.28;
-        _data->timer = 1.0;
-        std::cout << "已起立:up" << std::endl;
-      }
-      last_S3 = _data->rc_data.S3;
-    }
-  }
-  else if (_data->rc_data.S2 == 3)
-  {
+  // if (_data->rc_data.S2 == 1)
+  // {
+  //   _data->command = "passive";
+  //   // std::cout << "切换到被动模式" << std::endl;
+  // }
+  // else if (_data->rc_data.S2 == 0)
+  // {
+  //   _data->command = "stand";
+  //   // std::cout << "切换到站立模式" << std::endl;
+  //   if (_data->rc_data.S3 != last_S3)
+  //   {
+  //     if (_data->rc_data.S3 == 0)
+  //     {
+  //       _data->last_high = _data->set_high;
+  //       _data->set_high = -0.18;
+  //       _data->timer = 1.0;
+  //       std::cout << "已趴下:down" << std::endl;
+  //     }
+  //     else if (_data->rc_data.S3 == 1)
+  //     {
+  //       _data->last_high = _data->set_high;
+  //       _data->set_high = -0.28;
+  //       _data->timer = 1.0;
+  //       std::cout << "已起立:up" << std::endl;
+  //     }
+  //     last_S3 = _data->rc_data.S3;
+  //   }
+  // }
+  // else if (_data->rc_data.S2 == 3)
+  // {
 
-    _data->command = "trot";
-    // std::cout << "切换到行走模式" << std::endl;
-    if (_data->rc_data.S3 != last_S3)
-    {
-      if (_data->rc_data.S3 == 3)
-      {
-        _data->lift_height = 0.05;
-        std::cout << "下台阶:" << std::endl;
-      }
-      else if (_data->rc_data.S3 == 0)
-      {
-        _data->lift_height = 0.10;
-        std::cout << "正常高度:" << std::endl;
-      }
-      else if (_data->rc_data.S3 == 1)
-      {
-        _data->lift_height = 0.15;
-        std::cout << "上台阶:" << std::endl;
-      }
-      last_S3 = _data->rc_data.S3;
-    }
-  }
-  else
-  {
+  //   _data->command = "trot";
+  //   // std::cout << "切换到行走模式" << std::endl;
+  //   if (_data->rc_data.S3 != last_S3)
+  //   {
+  //     if (_data->rc_data.S3 == 3)
+  //     {
+  //       _data->lift_height = 0.05;
+  //       std::cout << "下台阶:" << std::endl;
+  //     }
+  //     else if (_data->rc_data.S3 == 0)
+  //     {
+  //       _data->lift_height = 0.10;
+  //       std::cout << "正常高度:" << std::endl;
+  //     }
+  //     else if (_data->rc_data.S3 == 1)
+  //     {
+  //       _data->lift_height = 0.15;
+  //       std::cout << "上台阶:" << std::endl;
+  //     }
+  //     last_S3 = _data->rc_data.S3;
+  //   }
+  // }
+  // else
+  // {
 
-    _data->command = "passive";
-    // std::cout << "切换到被动模式" << std::endl;
-  }
+  //   _data->command = "passive";
+  //   // std::cout << "切换到被动模式" << std::endl;
+  // }
 
   if (rc != 0)
   {
@@ -264,34 +264,35 @@ void FSM::update(double dt)
     {
     case 's':
     case 'S':
+
       _data->command = "stand";
       std::cout << "切换到站立模式" << std::endl;
       break;
 
     case 't':
     case 'T':
+
       _data->command = "trot";
       std::cout << "切换到行走模式" << std::endl;
       break;
 
     case 'j':
     case 'J':
+
       _data->command = "jump";
       std::cout << "切换到跳跃模式" << std::endl;
       break;
-
     case 'p':
-      _data->last_high = _data->set_high;
-      _data->set_high = -0.28;
-      _data->timer = 1.0;
-      std::cout << "已起立:up" << std::endl;
     case 'P':
     case ' ':
+
       _data->command = "passive";
       std::cout << "切换到被动模式" << std::endl;
       break;
+
     case 'd':
     case 'D':
+
       _data->last_high = _data->set_high;
       _data->set_high = -0.20;
       _data->timer = 1.0;
@@ -300,6 +301,7 @@ void FSM::update(double dt)
 
     case 'u':
     case 'U':
+
       _data->last_high = _data->set_high;
       _data->set_high = -0.28;
       _data->timer = 1.0;
@@ -308,14 +310,7 @@ void FSM::update(double dt)
 
     case 'r':
     case 'R':
-      _data->trot_long_l = 0.05;
-      _data->trot_long_r = 0.05;
-      _data->trot_wide_l = 0.00;
-      _data->trot_wide_r = 0.00;
-      _data->last_high = _data->set_high;
-      _data->set_high = -0.28;
-      _data->timer = 1.0;
-      std::cout << "已起立:up" << std::endl;
+      
       _data->rc_vx = 0.2;
       _data->rc_vy = 0;
       _data->rc_vw = 0;
@@ -325,14 +320,7 @@ void FSM::update(double dt)
 
     case 'w':
     case 'W':
-      _data->trot_long_l = 0.03;
-      _data->last_high = _data->set_high;
-      _data->set_high = -0.28;
-      _data->timer = 1.0;
-      std::cout << "已起立:up" << std::endl;
-      _data->trot_long_r = 0.03;
-      _data->trot_wide_l = 0.00;
-      _data->trot_wide_r = 0.00;
+      
       _data->rc_vx = 0.1;
       _data->rc_vy = 0;
       _data->rc_vw = 0;
@@ -342,29 +330,18 @@ void FSM::update(double dt)
 
     case 'f':
     case 'F':
-      _data->trot_long_l = -0.03;
-      _data->trot_long_r = -0.03;
-      _data->trot_wide_l = 0.00;
-      _data->trot_wide_r = 0.00;
+      
       _data->rc_vx = -0.1;
       _data->rc_vy = 0;
       _data->rc_vw = 0;
 
       std::cout << "已后退:fff" << std::endl;
       break;
-      _data->last_high = _data->set_high;
-      _data->set_high = -0.28;
-      _data->timer = 1.0;
-      std::cout << "已起立:up" << std::endl;
+      
     case 'x':
     case 'X':
-      _data->trot_long_l = 0.00;
-      _data->trot_long_r = 0.00;
-      _data->trot_wide_l = 0.00;
-      _data->last_high = _data->set_high;
-      _data->set_high = -0.28;
-      _data->timer = 1.0;
-      std::cout << "已起立:up" << std::endl;
+      
+      _data->rc_vx = -0.1;
       _data->rc_vy = 0;
       _data->rc_vw = 0;
 
@@ -373,10 +350,7 @@ void FSM::update(double dt)
 
     case 'l':
     case 'L':
-      _data->trot_long_l = 0.00;
-      _data->trot_long_r = 0.00;
-      _data->trot_wide_l = 0.00;
-      _data->trot_wide_r = 0.00;
+      
       _data->rc_vx = 0;
       _data->rc_vy = 0;
       _data->rc_vw = 0.3;
@@ -386,10 +360,7 @@ void FSM::update(double dt)
 
     case ';':
     case ':':
-      _data->trot_long_l = 0.00;
-      _data->trot_long_r = 0.00;
-      _data->trot_wide_l = 0.00;
-      _data->trot_wide_r = 0.00;
+      
       _data->rc_vx = 0;
       _data->rc_vy = 0;
       _data->rc_vw = -0.3;
@@ -399,10 +370,7 @@ void FSM::update(double dt)
 
     case 'n':
     case 'N':
-      _data->trot_long_l = 0.00;
-      _data->trot_long_r = 0.00;
-      _data->trot_wide_l = 0.0005;
-      _data->trot_wide_r = -0.0005;
+      
       _data->rc_vx = 0;
       _data->rc_vy = 0.08;
       _data->rc_vw = 0;
@@ -412,10 +380,7 @@ void FSM::update(double dt)
 
     case 'm':
     case 'M':
-      _data->trot_long_l = 0.00;
-      _data->trot_long_r = 0.00;
-      _data->trot_wide_l = -0.0005;
-      _data->trot_wide_r = 0.0005;
+      
       _data->rc_vx = 0;
       _data->rc_vy = -0.08;
       _data->rc_vw = 0;
@@ -424,16 +389,19 @@ void FSM::update(double dt)
       break;
 
     case '8':
+
       _data->lift_height = 0.15;
       std::cout << "上台阶:" << std::endl;
       break;
 
     case '5':
+
       _data->lift_height = 0.10;
       std::cout << "正常高度:" << std::endl;
       break;
 
     case '2':
+    
       _data->lift_height = 0.05;
       std::cout << "下台阶:" << std::endl;
       break;

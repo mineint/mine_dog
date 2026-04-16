@@ -29,14 +29,25 @@ void State_Trot::runState()
 
         Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
 
+        // 键盘版
         _data->swing_controller->ICR_compute(
             leg,
-            _data->rc_data.CH3,
-            -_data->rc_data.CH4,
-            -_data->rc_data.CH1,
+            _data->rc_vx,
+            _data->rc_vy,
+            _data->rc_vw,
             _data->target_x[leg],
             _data->target_y[leg],
             0.5);
+
+        // 遥控器版
+        // _data->swing_controller->ICR_compute(
+        //     leg,
+        //     _data->rc_data.CH3,
+        //     -_data->rc_data.CH4,
+        //     -_data->rc_data.CH1,
+        //     _data->target_x[leg],
+        //     _data->target_y[leg],
+        //     0.5);
         // stance_time给固定值，调整步态是注意修改
 
         // 左右腿分别管理
