@@ -74,7 +74,7 @@ int calc_checksum(unsigned char *data, unsigned short len, unsigned short *check
 /*-------------------------------------------------------------------------------------------------------------*/
 int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_info_t *info)
 {
-	unsigned char ret = 0xff;
+	int ret = analysis_done; // 默认返回已处理
 
 	if(NULL == data || (unsigned char)0 == header.data_len || NULL == info)
 	{
@@ -90,10 +90,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				ret = analysis_ok;
 				info->sensor_temp = get_signed_short(data) * SENSOR_TEMP_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -106,10 +103,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				info->accel.y = get_signed_int(data + SINGLE_DATA_BYTES) * NOT_MAG_DATA_FACTOR;
 				info->accel.z = get_signed_int(data + SINGLE_DATA_BYTES * 2) * NOT_MAG_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -120,44 +114,26 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				ret = analysis_ok;
 				info->angle_rate.x = get_signed_int(data) * NOT_MAG_DATA_FACTOR;
 				info->angle_rate.y = get_signed_int(data + SINGLE_DATA_BYTES) * NOT_MAG_DATA_FACTOR;
-				info->angle_rate.z = get_signed_int(data + ANGLE_DATA_LEN - SINGLE_DATA_BYTES) * NOT_MAG_DATA_FACTOR;
+				info->angle_rate.z = get_signed_int(data + SINGLE_DATA_BYTES * 2) * NOT_MAG_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
 		case MAGNETIC_ID:
+		case RAW_MAGNETIC_ID:
 		{
 			if(MAGNETIC_DATA_LEN == header.data_len)
 			{
 				ret = analysis_ok;
-				info->norm_mag.x = get_signed_int(data) * NOT_MAG_DATA_FACTOR;
-				info->norm_mag.y = get_signed_int(data + SINGLE_DATA_BYTES) * NOT_MAG_DATA_FACTOR;
-				info->norm_mag.z = get_signed_int(data + SINGLE_DATA_BYTES * 2) * NOT_MAG_DATA_FACTOR;
+				float factor = (header.data_id == MAGNETIC_ID) ? NOT_MAG_DATA_FACTOR : MAG_RAW_DATA_FACTOR;
+				axis_data_t *target = (header.data_id == MAGNETIC_ID) ? &info->norm_mag : &info->raw_mag;
+				
+				target->x = get_signed_int(data) * factor;
+				target->y = get_signed_int(data + SINGLE_DATA_BYTES) * factor;
+				target->z = get_signed_int(data + SINGLE_DATA_BYTES * 2) * factor;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
-		}
-		break;
-
-		case RAW_MAGNETIC_ID:
-		{
-			if(MAGNETIC_RAW_DATA_LEN == header.data_len)
-			{
-				ret = analysis_ok;
-				info->raw_mag.x = get_signed_int(data) * MAG_RAW_DATA_FACTOR;
-				info->raw_mag.y = get_signed_int(data + SINGLE_DATA_BYTES) * MAG_RAW_DATA_FACTOR;
-				info->raw_mag.z = get_signed_int(data + SINGLE_DATA_BYTES * 2) * MAG_RAW_DATA_FACTOR;
-			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -170,10 +146,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				info->attitude.roll = get_signed_int(data + SINGLE_DATA_BYTES) * NOT_MAG_DATA_FACTOR;
 				info->attitude.yaw = get_signed_int(data + SINGLE_DATA_BYTES * 2) * NOT_MAG_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -187,10 +160,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				info->attitude.quaternion_data2 = get_signed_int(data + SINGLE_DATA_BYTES * 2) * NOT_MAG_DATA_FACTOR;
 				info->attitude.quaternion_data3 = get_signed_int(data + SINGLE_DATA_BYTES * 3) * NOT_MAG_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -203,10 +173,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				info->location.longtidue = get_signed_int(data + SINGLE_DATA_BYTES) * LONG_LAT_DATA_FACTOR;
 				info->location.altidue 	 = get_signed_int(data + SINGLE_DATA_BYTES * 2)  * ALT_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -215,14 +182,15 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 			if(HRES_LOCATION_DATA_LEN == header.data_len)
 			{
 				ret = analysis_ok;
-				info->location.latitude  = *((long long int *)data) * HRES_LONG_LAT_DATA_FACTOR;
-				info->location.longtidue = *((long long int *)(data + SINGLE_DATA_BYTES * 2)) * HRES_LONG_LAT_DATA_FACTOR;
-				info->location.altidue 	 = get_signed_int(data + HRES_LOCATION_DATA_LEN - SINGLE_DATA_BYTES)  * ALT_DATA_FACTOR;
+				long long temp_lat = 0, temp_lon = 0;
+				// 使用 memcpy 解决对齐取值问题
+				memcpy(&temp_lat, data, 8);
+				memcpy(&temp_lon, data + 8, 8);
+				info->location.latitude  = temp_lat * HRES_LONG_LAT_DATA_FACTOR;
+				info->location.longtidue = temp_lon * HRES_LONG_LAT_DATA_FACTOR;
+				info->location.altidue 	 = get_signed_int(data + 16)  * ALT_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -235,10 +203,7 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 				info->vel.vel_e = get_signed_int(data + SINGLE_DATA_BYTES) * SPEED_DATA_FACTOR;
 				info->vel.vel_d = get_signed_int(data + SINGLE_DATA_BYTES * 2) * SPEED_DATA_FACTOR;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -247,12 +212,10 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 			if(UTC_DATA_LEN == header.data_len)
 			{
 				ret = analysis_ok;
-				memcpy((unsigned char *)&info->utc.msecond, data, sizeof(utc_time_t));
+				// 修复：拷贝到结构体首地址而非 msecond 成员地址，避免偏移错误
+				memcpy((unsigned char *)&info->utc, data, sizeof(utc_time_t));
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
@@ -261,111 +224,97 @@ int check_data_len_by_id(payload_data_t header, unsigned char *data, protocol_in
 			if(NAV_STATUS_DATA_LEN == header.data_len)
 			{
 				ret = analysis_ok;
-				info->status = *((nav_status_t *)data);
+				nav_status_t status;
+				memcpy(&status, data, 1);
+				info->status = status;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
 		case SAMPLE_TIMESTAMP_ID:
+		case DATA_READY_TIMESTAMP_ID:
 		{
 			if(SAMPLE_TIMESTAMP_DATA_LEN == header.data_len)
 			{
 				ret = analysis_ok;
-				info->sample_timestamp = *((unsigned int *)data);
+				unsigned int ts = 0;
+				memcpy(&ts, data, 4);
+				if(header.data_id == SAMPLE_TIMESTAMP_ID)
+					info->sample_timestamp = ts;
+				else
+					info->data_ready_timestamp = ts;
 			}
-			else
-			{
-				ret = data_len_err;
-			}
-		}
-		break;
-
-		case DATA_READY_TIMESTAMP_ID:
-		{
-			if(DATA_READY_TIMESTAMP_DATA_LEN == header.data_len)
-			{
-				ret = analysis_ok;
-				info->data_ready_timestamp = *((unsigned int *)data);
-			}
-			else
-			{
-				ret = data_len_err;
-			}
+			else { ret = data_len_err; }
 		}
 		break;
 
 		default:
+			ret = analysis_done;
 		break;
 	}
 
 	return ret;
 }
 
-/*--------------------------------------------------------------------------------------------------------------
-* 输出协议为：header1(0x59) + header2(0x53) + tid(2B) + payload_len(1B) + payload_data(Nbytes) + ck1(1B) + ck2(1B)
-* crc校验从TID开始到payload data的最后一个字节
-*/
 int analysis_data(unsigned char *data, short len, protocol_info_t *info)
 {
 	unsigned short payload_len = 0;
-	unsigned short check_sum = 0;
+	unsigned short check_sum_calc = 0;
+	unsigned short check_sum_recv = 0;
 	unsigned short pos = 0;
 	int ret = analysis_done;
 
 	output_data_header_t *header = NULL;
 	payload_data_t *payload = NULL;
 
-	if(NULL == data || 0 >= len)
+	if(NULL == data || len < PROTOCOL_MIN_LEN)
 	{
-		return para_err;
+		return data_len_err;
 	}
 
-	if(len < PROTOCOL_MIN_LEN)
-	{
-        return data_len_err;
-	}
-
-	/*judge protocol header*/
+	/* 判断帧头 */
 	if(PROTOCOL_FIRST_BYTE == data[PROTOCOL_FIRST_BYTE_POS] && \
 		PROTOCOL_SECOND_BYTE == data[PROTOCOL_SECOND_BYTE_POS])
 	{
-		/*further check*/
 		header = (output_data_header_t *)data;
 		payload_len = header->len;
+
+		/* 增加一层保护，防止长度字节错误导致内存溢出 */
+		if(payload_len > 250) return analysis_done; 
 
 		if(payload_len + PROTOCOL_MIN_LEN > len)
 		{
 			return 	data_len_err;
 		}
 
-		/*checksum*/
-		calc_checksum(data + CRC_CALC_START_POS, CRC_CALC_LEN(payload_len), &check_sum);
-		if(check_sum != *((unsigned short *)(data + PROTOCOL_CRC_DATA_POS(payload_len))))
+		/* 校验计算 */
+		calc_checksum(data + CRC_CALC_START_POS, CRC_CALC_LEN(payload_len), &check_sum_calc);
+		
+		/* 修复：使用 memcpy 获取接收到的校验和，防止对齐问题 */
+		memcpy(&check_sum_recv, data + PROTOCOL_CRC_DATA_POS(payload_len), 2);
+		
+		if(check_sum_calc != check_sum_recv)
 		{
 			return crc_err;
 		}
 
-		/*analysis payload data*/
+		/* 解析 Payload */
 		pos = PAYLOAD_POS;
+		int remaining_payload = payload_len;
 
-		while(payload_len > 0)
+		while(remaining_payload > (int)sizeof(payload_data_t))
 		{
 			payload = (payload_data_t *)(data + pos);
+			
+			// 再次检查长度，防止非法 payload 导致死循环
+			if(payload->data_len + (int)sizeof(payload_data_t) > remaining_payload) break;
+
 			ret = check_data_len_by_id(*payload, (unsigned char *)payload + sizeof(payload_data_t), info);
-			if(analysis_ok == ret)
-			{
-				pos += payload->data_len + sizeof(payload_data_t);
-				payload_len -= payload->data_len + sizeof(payload_data_t);
-			}
-			else
-			{
-				pos++;
-				payload_len--;
-			}
+			
+			int step = payload->data_len + sizeof(payload_data_t);
+			pos += step;
+			remaining_payload -= step;
 		}
 
 		return analysis_ok;
@@ -375,6 +324,7 @@ int analysis_data(unsigned char *data, short len, protocol_info_t *info)
 		return analysis_done;
 	}
 }
+
 
 
 /*------------------------------------------------------------------------------------------*/

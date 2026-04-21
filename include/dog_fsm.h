@@ -37,7 +37,7 @@ protected:
 
 class FSM {
 public:
-    explicit FSM(std::shared_ptr<Tangair_usb2can> can = nullptr, std::shared_ptr<ImuReader> imu = nullptr);
+    explicit FSM(std::shared_ptr<Tangair_usb2can> can = nullptr);
 
     // 主更新函数
     void update(double dt);

@@ -37,6 +37,11 @@ cmake -S . -B build
 cd build
 make
 
+mkdir build && cd build
+cmake ..
+make
+
+
 sudo usermod -a -G dialout $USER
 
 关键步骤： 执行完后，你必须注销当前用户并重新登录（或者直接重启电脑），修改才会生效。

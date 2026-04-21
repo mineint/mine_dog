@@ -66,7 +66,7 @@ int USBRCReceiver::openSerial(const char* device) {
         return -1; // 所有设备都打开失败
     }
     
-    struct termios tty{};
+    
     if (tcgetattr(serial_fd, &tty) != 0) {
         perror("tcgetattr");
         ::close(serial_fd);

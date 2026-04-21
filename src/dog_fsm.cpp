@@ -21,11 +21,11 @@ const float abad_offset[4] = {0.4857f, 0.4857f, 0.4857f, 0.4857f};
 const float hip_offset[4] = {-0.9565f, -0.9565f, -0.9565f, -0.9565f};
 const float knee_offset[4] = {2.5144f, 2.5144f, 2.5144f, 2.5144f};
 
-FSM::FSM(std::shared_ptr<Tangair_usb2can> can, std::shared_ptr<ImuReader> imu)
+FSM::FSM(std::shared_ptr<Tangair_usb2can> can)
 {
   _data = std::make_unique<FSM_Data>();
   _data->can_ptr = can;
-  _data->imu_ptr = imu;
+  _data->imu_ptr = std::make_unique<ImuReader>();;
   _data->rc_ptr = std::make_unique<USBRCReceiver>();
   _data->radar_ptr = std::make_unique<RadarReceiver>();
   _data->leg_controller = std::make_unique<LegController>();
@@ -105,7 +105,7 @@ void FSM::update_motor(Tangair_usb2can *can_ptr)
   {
     _data->command = "passive";
     _data->leg_controller->sendZeroTorques(_data->can_ptr.get());
-    //_data->can_ptr->DISABLE_ALL_MOTOR(100);
+    // _data->can_ptr->DISABLE_ALL_MOTOR(100);
 
     if (_data->tx_count % 200 == 0)
     {
@@ -162,13 +162,17 @@ void FSM::update_radar(RadarReceiver *radar_ptr)
 
 void FSM::update_imu(ImuReader *imu_ptr)
 {
-  _data->imu_data.pitch = imu_ptr->g_output_info.attitude.pitch;
-  _data->imu_data.roll = imu_ptr->g_output_info.attitude.roll;
+  _data->imu_data.pitch = imu_ptr->pitch;
+  _data->imu_data.roll = imu_ptr->roll;
   _data->imu_data.yaw = imu_ptr->g_output_info.attitude.yaw;
+
+  if (_data->tx_count % 100 == 0)
+  {
 
   // std::cout << "pitch: " << _data->imu_data.pitch << std::endl;
   // std::cout << "roll: " << _data->imu_data.roll << std::endl;
   // std::cout << "yaw: " << _data->imu_data.yaw << std::endl;
+  }
 }
 
 void FSM::update(double dt)
@@ -341,7 +345,7 @@ void FSM::update(double dt)
     case 'x':
     case 'X':
       
-      _data->rc_vx = -0.1;
+      _data->rc_vx = 0;
       _data->rc_vy = 0;
       _data->rc_vw = 0;
 
@@ -402,7 +406,7 @@ void FSM::update(double dt)
 
     case '2':
     
-      _data->lift_height = 0.05;
+      _data->lift_height = 0.08;
       std::cout << "下台阶:" << std::endl;
       break;
     }

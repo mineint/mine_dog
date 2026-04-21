@@ -19,6 +19,9 @@ public:
     double smooth_step;
     double torques_progress;
     double torques_smooth_step;
+
+    float half_L = 0.4; 
+    float half_W = 0.1; 
     
 };
 

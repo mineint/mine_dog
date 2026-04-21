@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <thread>
+#include <termios.h>
 
 // RC数据结构
 struct RadarData
@@ -28,6 +29,8 @@ private:
     int recv_len;                  // 当前缓冲区数据长度
     const char *device_path;       // 设备路径
 
+    struct termios tty{};
+
     // 串口配置函数
     int openSerial(const char *device);
 
@@ -40,7 +43,7 @@ private:
     // RC线程函数
     void RC_thread_function();
 
-    const char *Device = "/dev/ttyUSB0";
+    const char *Device = "/dev/ttyUSB1";
 
 public:
     // 构造函数

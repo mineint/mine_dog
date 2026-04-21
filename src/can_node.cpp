@@ -122,7 +122,7 @@ int main() {
     // 初始化硬件 
     auto CAN_ptr = std::make_shared<Tangair_usb2can>();
     auto IMU_ptr = std::make_shared<ImuReader>();
-    auto FSM_ptr = std::make_shared<FSM>(CAN_ptr, IMU_ptr); 
+    auto FSM_ptr = std::make_shared<FSM>(CAN_ptr); 
     auto ConFSM_ptr = std::make_shared<ControlFSM>(FSM_ptr, CAN_ptr);
     //auto USBRC_ptr = std::make_shared<USBRCReceiver>();
     //auto Radar_ptr = std::make_shared<RadarReceiver>();

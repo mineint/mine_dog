@@ -1,7 +1,7 @@
 #include "dog_fsm.h"
 #include "leg_controller.h"
 #include "state_stand.h"
-
+#include <array>
 
 void State_Stand::onEnter(){
     std::cout << "State Stand onEnter" << std::endl;
@@ -37,26 +37,46 @@ void State_Stand::runState(){
         _data->start_high = _data->last_high + smooth_step * (_data->set_high - _data->last_high);
     } 
         
-    Eigen::Vector3d nominal_pDes(0.0, 0.096, _data->start_high); 
+    std::array<Eigen::Vector3d, 4> nominal_pDes;
+    nominal_pDes.fill(Eigen::Vector3d(0.0, 0.096, _data->start_high)); 
     
     
 
-    if (_data->tx_count % 100 == 0)
-            { 
+    // if (_data->tx_count % 100 == 0)
+    //         { 
             
-            std::cout << "start_high:" << _data->start_high << std::endl;
-            std::cout << "timer:" << _data->timer << std::endl;
-            }
-        
-    // VMC相关参数
-    LegCommand cmd;
-    cmd.pDes   = nominal_pDes;
-    cmd.vDes   = Eigen::Vector3d::Zero();  // 站立时目标速度为 0
-    cmd.kpCart = _data->leg_controller->stance_kp;         
-    cmd.kdCart = _data->leg_controller->stance_kd;
+    //         std::cout << "start_high:" << _data->start_high << std::endl;
+    //         std::cout << "timer:" << _data->timer << std::endl;
+    //         }
+
+    
+    // 计算由于倾斜导致的足端高度修正量 
+    float pitch_rad = _data->imu_data.pitch * M_PI / 180.0f;
+    float roll_rad  = _data->imu_data.roll * M_PI / 180.0f;
+
+    float z_pitch_comp = half_L * sin(pitch_rad);
+    float z_roll_comp  = half_W * sin(roll_rad);    
 
     for (int leg = 0; leg < 4; ++leg) {  
- 
+
+    float delta_z = 0;
+
+    if (leg == 0 || leg == 1) { // 未修正符号
+        delta_z += z_pitch_comp;
+    } else {                    
+        delta_z -= z_pitch_comp;
+    }
+
+    if (leg == 0 || leg == 2) { 
+        delta_z -= z_roll_comp;
+    } else {                   
+        delta_z += z_roll_comp;
+    }
+
+    
+
+    // 更新期望高度
+    nominal_pDes[leg](2) = _data->start_high - delta_z; 
 
     Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
 
@@ -65,10 +85,19 @@ void State_Stand::runState(){
         // std::cout << "target_x" << leg + 1 << ":" <<  _data->target_x[leg] << std::endl;
         // std::cout << "target_y" << leg + 1 << ":" << _data->target_y[leg] << std::endl;
 
-        // std::cout << leg + 1 << ":" <<  foot_pos << std::endl;
-        // std::cout << "torques_smooth_step: " <<  torques_smooth_step << std::endl;
+        std::cout << leg + 1 << ":" << std::endl;
+        std::cout << "nominal_pDes: " <<  nominal_pDes[leg](2) << std::endl;
 
         } 
+
+    // VMC相关参数
+    LegCommand cmd;
+    cmd.pDes   = nominal_pDes[leg];
+    cmd.vDes   = Eigen::Vector3d::Zero();  // 站立时目标速度为 0
+    cmd.kpCart = _data->leg_controller->stance_kp;         
+    cmd.kdCart = _data->leg_controller->stance_kd;
+
+
     Eigen::Matrix3d J = _data->kinematics->computeJacobian(_data->leg_date[leg].q);
 
     _data->legs_filter[leg].foot_vel = J * _data->leg_date[leg].qd;

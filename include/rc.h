@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <thread>
+#include <termios.h>
 
 // RC数据结构
 struct RCData
@@ -54,6 +55,8 @@ public:
     ~USBRCReceiver();
 
     RCData _RCData{};
+
+    struct termios tty{};
 
     std::thread _RC_thread;
     bool running_ = true;
