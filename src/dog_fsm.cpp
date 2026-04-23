@@ -274,19 +274,23 @@ void FSM::key_control(char rc)
 
     case 'd':
     case 'D':
-
+      _data->slow_torques_swith = false;
+      _data->slope_swith = false; 
       _data->last_high = _data->set_high;
       _data->set_high = -0.20;
-      _data->timer = 1.0;
+      _data->stand_time = 1.0;
+      _data->timer = 0.0;
       std::cout << "已趴下:down" << std::endl;
       break;
 
     case 'u':
     case 'U':
-
+      _data->slow_torques_swith = false;
+      _data->slope_swith = false; 
       _data->last_high = _data->set_high;
       _data->set_high = -0.28;
-      _data->timer = 1.0;
+      _data->stand_time = 1.0;
+      _data->timer = 0.0;
       std::cout << "已起立:up" << std::endl;
       break;
 
@@ -388,9 +392,29 @@ void FSM::key_control(char rc)
       std::cout << "下台阶:" << std::endl;
       break;
 
+    case '_':
     case '-':
 
-     _data->stand_balance = true;
+     // 过斜坡
+     _data->slope_swith = true;
+     _data->slope_state = 1;
+     break;
+    
+    case '+':
+    case '=':
+     
+     // 上斜坡
+     _data->slope_swith = true;
+     _data->slope_state = 2;
+     break;
+    
+    case '0':
+     
+     // 恢复正常
+     _data->slope_swith = true; 
+     _data->slope_state = 0;
+     
+     break;
     }
 }
 

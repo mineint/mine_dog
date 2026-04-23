@@ -136,3 +136,10 @@ Eigen::Vector3d LegKinematics::inverseKinematics(const Eigen::Vector3d& p,
     return Eigen::Vector3d(q_abad, q_hip, q_knee);
 }
 
+void LegKinematics::approach(double& current, double target, double step) {
+    if (current < target) {
+        current = std::min(current + step, target);
+    } else if (current > target) {
+        current = std::max(current - step, target);
+    }
+}

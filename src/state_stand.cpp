@@ -15,71 +15,67 @@ void State_Stand::runState(){
     //std::cout << "现在是站立状态\n " << std::endl;
     _data->tx_count++;
   
-    // 缓慢起步 
-    const double stand_time = 2.3;    // 需要缓起步就清零time
-    if (_data->timer <= 1.0) 
+   
+
+    // 力矩缓起
+    if (_data->timer <= 1.0 && _data->slow_torques_swith) 
     {
         torques_progress = _data->timer / 1.0;
         torques_smooth_step = torques_progress * torques_progress * (3 - 2 * torques_progress);
+        torques_smooth_step = std::min(torques_smooth_step, 1.0);
     }
-    if (_data->timer < stand_time) 
+    
+    // 高度缓起
+    if (_data->timer < _data->stand_time) 
     {
         _data->timer += 0.001; 
-        progress = _data->timer / stand_time;
+        progress = _data->timer / _data->stand_time;
         smooth_step = progress * progress * (3 - 2 * progress);
         _data->start_high = _data->last_high + smooth_step * (_data->set_high - _data->last_high);
     } 
-        
-    std::array<Eigen::Vector3d, 4> nominal_pDes;
-    nominal_pDes.fill(Eigen::Vector3d(0.0, 0.096, _data->start_high)); 
     
+    // 平地的足端位置
+    if (!_data->slope_swith){
+    nominal_pDes.fill(Eigen::Vector3d(0.0, 0.096, _data->start_high)); 
+    }
     // if (_data->tx_count % 100 == 0)
     //         { 
-            
     //         std::cout << "start_high:" << _data->start_high << std::endl;
     //         std::cout << "timer:" << _data->timer << std::endl;
     //         }
 
-    // 判断是否获取修正数据
-    // if (_data->stand_balance){
-    // // 计算由于倾斜导致的足端高度修正量 
-    // float pitch_rad = _data->imu_data.pitch * M_PI / 180.0f;
-    // float roll_rad  = _data->imu_data.roll * M_PI / 180.0f;
-    // if (abs(pitch_rad) < 0.008) pitch_rad = 0; // 约0.5度的死区
-    // if (abs(roll_rad) < 0.008) roll_rad = 0; // 约0.5度的死区
-    // z_pitch_comp = k_comp * half_L * sin(pitch_rad);
-    // z_roll_comp  = k_comp * half_W * sin(roll_rad); 
-    
-    // }   
 
-    
     for (int leg = 0; leg < 4; ++leg) {  
-
-    // 判断是否做动态平衡
-    // if (_data->stand_balance){
     
-    // // std::cout << "正在做动态平衡" << std::endl;
-    // float delta_z = 0;
-
-    // if (leg == 0 || leg == 1) { 
-    //     delta_z += z_pitch_comp;
-    // } else {                    
-    //     delta_z -= z_pitch_comp;
-    // }
-
-    // if (leg == 0 || leg == 2) { 
-    //     delta_z -= z_roll_comp;
-    // } else {                   
-    //     delta_z += z_roll_comp;
-    // }
-
-    // // 更新期望高度
-    // nominal_pDes[leg](2) = _data->start_high - delta_z; 
+    // 斜坡平衡
+    if (_data->slope_swith) {
     
-    // nominal_pDes[leg](2)  = std::clamp(nominal_pDes[leg](2), -0.32, -0.24);
-    // }
+    nominal_pDes[leg](0) = 0;
+    nominal_pDes[leg](0) = 0.096;
 
-    Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
+    double target_z = _data->start_high;
+    const double step_size = 0.0002; // 建议改为 speed * dt
+
+    switch (_data->slope_state) {
+        case 0:
+            
+            break;
+        case 1: // 侧倾补偿
+            if (leg == 0 || leg == 2) 
+                target_z = _data->start_high + _data->slope_run_high;
+            break;
+        case 2: // 俯仰补偿
+            if (leg == 0 || leg == 1) 
+                target_z = _data->start_high + _data->slope_up_high;
+            break;
+    }
+    // 统一更新高度
+    _data->kinematics->approach(nominal_pDes[leg](2), target_z, step_size);
+
+    }
+    
+
+    
 
     if (_data->tx_count % 100 == 0)
         { 
@@ -94,13 +90,13 @@ void State_Stand::runState(){
     // VMC相关参数
     LegCommand cmd;
     cmd.pDes   = nominal_pDes[leg];
-    cmd.vDes   = Eigen::Vector3d::Zero();  // 站立时目标速度为 0
+    cmd.vDes   = Eigen::Vector3d::Zero();  
     cmd.kpCart = _data->leg_controller->stance_kp;         
     cmd.kdCart = _data->leg_controller->stance_kd;
 
-
+    // VMC参数获取
+    Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
     Eigen::Matrix3d J = _data->kinematics->computeJacobian(_data->leg_date[leg].q);
-
     _data->legs_filter[leg].foot_vel = J * _data->leg_date[leg].qd;
     Eigen::Vector3d filtered_v = _data->legs_filter[leg].update_filter(_data->legs_filter[leg].foot_vel);  
        
@@ -161,6 +157,10 @@ FSM_StateName State_Stand::checkTransition(){
 }
 
 void State_Stand::onExit(){
+    _data->target_z[0] = nominal_pDes[0](2);
+    _data->target_z[1] = nominal_pDes[1](2);
+    _data->target_z[2] = nominal_pDes[2](2);
+    _data->target_z[3] = nominal_pDes[3](2);
     std::cout << "Stand Stand onExit" << std::endl;
 }
 

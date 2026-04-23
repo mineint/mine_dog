@@ -12,7 +12,9 @@ void State_Passive::onEnter(){
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     _data->timer = 0;   
+    _data->stand_time = 2.0;
     _data->start_high = -0.06;
+    _data->slow_torques_swith = true;
     std::cout << "Entered PASSIVE" << std::endl;
 }
 

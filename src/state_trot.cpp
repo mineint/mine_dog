@@ -30,42 +30,42 @@ void State_Trot::runState()
         Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
 
         // 键盘版
-        // _data->swing_controller->ICR_compute(
-        //     leg,
-        //     _data->rc_vx,
-        //     _data->rc_vy,
-        //     _data->rc_vw,
-        //     _data->target_x[leg],
-        //     _data->target_y[leg],
-        //     0.5);
-
-        // 遥控器版
         _data->swing_controller->ICR_compute(
             leg,
-            -_data->rc_data.CH3,
-            _data->rc_data.CH4,
-            _data->rc_data.CH1,
+            _data->rc_vx,
+            _data->rc_vy,
+            _data->rc_vw,
             _data->target_x[leg],
             _data->target_y[leg],
             0.5);
+
+        // 遥控器版
+        // _data->swing_controller->ICR_compute(
+        //     leg,
+        //     -_data->rc_data.CH3,
+        //     _data->rc_data.CH4,
+        //     _data->rc_data.CH1,
+        //     _data->target_x[leg],
+        //     _data->target_y[leg],
+        //     0.5);
         // stance_time给固定值，调整步态是注意修改
 
         // 左右腿分别管理
         Eigen::Vector3d starting_pDes_l(-_data->target_x[leg],
                                         0.096 + _data->target_y[leg],
-                                        _data->start_high);
+                                        _data->target_z[leg]);
 
         Eigen::Vector3d starting_pDes_r(-_data->target_x[leg],
                                         0.096 + _data->target_y[leg],
-                                        _data->start_high);
+                                        _data->target_z[leg]);
 
         Eigen::Vector3d destination_pDes_l(_data->target_x[leg],
                                            0.096 - _data->target_y[leg],
-                                           _data->start_high);
+                                           _data->target_z[leg]);
 
         Eigen::Vector3d destination_pDes_r(_data->target_x[leg],
                                            0.096 - _data->target_y[leg],
-                                           _data->start_high);
+                                           _data->target_z[leg]);
 
         if (leg == 0 || leg == 2)
         {
@@ -95,7 +95,7 @@ void State_Trot::runState()
             t_stance = std::clamp(t_stance, 0.0, 1.0);
 
             Eigen::Vector3d support_pDes = _data->swing_controller->generateBezier5Trajectory(t_stance, _data->lift_height, _data->next_foot_target[leg], _data->last_touchdown_pos[leg]);
-            Eigen::Vector3d nominal_pDes = Eigen::Vector3d(support_pDes[0], support_pDes[1], _data->start_high);
+            Eigen::Vector3d nominal_pDes = Eigen::Vector3d(support_pDes[0], support_pDes[1], _data->target_z[leg]);
 
             // VMC相关参数
             LegCommand cmd;
@@ -190,7 +190,7 @@ void State_Trot::runState()
         double t_swing = (leg_phase - duty) / (1.0 - duty);
         Eigen::Vector3f desired_velocity = {0.f, 0.f, 0.1f};
         Eigen::Vector3f Raibert[leg];
-        Raibert[leg] = _data->swing_controller->computeRaibertFootstep(leg, desired_velocity, t_stance, t_swing, _data->start_high);
+        Raibert[leg] = _data->swing_controller->computeRaibertFootstep(leg, desired_velocity, t_stance, t_swing, _data->target_z);
         if (_data->tx_count % 10 == 0)
             {
             std::cout << "Raibert:" << leg + 1 << Raibert[leg] << std::endl;

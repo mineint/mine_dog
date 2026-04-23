@@ -14,6 +14,8 @@ public:
     FSM_StateName checkTransition() override;
 
     void onExit() override;
+
+    std::array<Eigen::Vector3d, 4> nominal_pDes;
     
     // 缓起动相关参数
     double progress;

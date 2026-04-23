@@ -23,9 +23,8 @@ public:
     // throw std::runtime_error 如果不可达
     Eigen::Vector3d inverseKinematics(const Eigen::Vector3d& p,
                                       bool prefer_knee_bend_forward = true) const;
-
-    // 获取连杆长度
-    const Eigen::Vector3f& getLegLengths() const { return leg_lengths_; }
+    
+    void approach(double& current, double target, double step);
 
 private:
     Eigen::Vector3f leg_lengths_;  // [L1(abad offset), L2(thigh), L3(calf)]
