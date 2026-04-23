@@ -9,9 +9,8 @@ public:
 
     void onEnter() override;
 
-    
-
     void runState() override;
+    
     FSM_StateName checkTransition() override;
 
     void onExit() override;

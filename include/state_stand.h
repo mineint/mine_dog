@@ -14,7 +14,8 @@ public:
     FSM_StateName checkTransition() override;
 
     void onExit() override;
-
+    
+    // 缓起动相关参数
     double progress;
     double smooth_step;
     double torques_progress;
@@ -23,5 +24,8 @@ public:
     float half_L = 0.4; 
     float half_W = 0.1; 
     
+    float z_pitch_comp;
+    float z_roll_comp;
+    float k_comp = 0.5; // 补偿强度
 };
 

@@ -9,20 +9,13 @@ void State_Stand::onEnter(){
 }
 
 void State_Stand::runState(){ 
-    // 1. 更新步态调度器
-    _data->gait_scheduler->update(_data->dt);
 
-    // 2. 准备所有腿的当前状态和命令
+
     std::vector<Eigen::Vector3d> leg_torques(4);  // 每条腿的3个力矩
     //std::cout << "现在是站立状态\n " << std::endl;
     _data->tx_count++;
-
-    // 站立时所有腿都应为 stance
-    
-        
+  
     // 缓慢起步 
-    
-    
     const double stand_time = 2.3;    // 需要缓起步就清零time
     if (_data->timer <= 1.0) 
     {
@@ -40,8 +33,6 @@ void State_Stand::runState(){
     std::array<Eigen::Vector3d, 4> nominal_pDes;
     nominal_pDes.fill(Eigen::Vector3d(0.0, 0.096, _data->start_high)); 
     
-    
-
     // if (_data->tx_count % 100 == 0)
     //         { 
             
@@ -49,34 +40,44 @@ void State_Stand::runState(){
     //         std::cout << "timer:" << _data->timer << std::endl;
     //         }
 
+    // 判断是否获取修正数据
+    // if (_data->stand_balance){
+    // // 计算由于倾斜导致的足端高度修正量 
+    // float pitch_rad = _data->imu_data.pitch * M_PI / 180.0f;
+    // float roll_rad  = _data->imu_data.roll * M_PI / 180.0f;
+    // if (abs(pitch_rad) < 0.008) pitch_rad = 0; // 约0.5度的死区
+    // if (abs(roll_rad) < 0.008) roll_rad = 0; // 约0.5度的死区
+    // z_pitch_comp = k_comp * half_L * sin(pitch_rad);
+    // z_roll_comp  = k_comp * half_W * sin(roll_rad); 
     
-    // 计算由于倾斜导致的足端高度修正量 
-    float pitch_rad = _data->imu_data.pitch * M_PI / 180.0f;
-    float roll_rad  = _data->imu_data.roll * M_PI / 180.0f;
+    // }   
 
-    float z_pitch_comp = half_L * sin(pitch_rad);
-    float z_roll_comp  = half_W * sin(roll_rad);    
-
+    
     for (int leg = 0; leg < 4; ++leg) {  
 
-    float delta_z = 0;
-
-    if (leg == 0 || leg == 1) { // 未修正符号
-        delta_z += z_pitch_comp;
-    } else {                    
-        delta_z -= z_pitch_comp;
-    }
-
-    if (leg == 0 || leg == 2) { 
-        delta_z -= z_roll_comp;
-    } else {                   
-        delta_z += z_roll_comp;
-    }
-
+    // 判断是否做动态平衡
+    // if (_data->stand_balance){
     
+    // // std::cout << "正在做动态平衡" << std::endl;
+    // float delta_z = 0;
 
-    // 更新期望高度
-    nominal_pDes[leg](2) = _data->start_high - delta_z; 
+    // if (leg == 0 || leg == 1) { 
+    //     delta_z += z_pitch_comp;
+    // } else {                    
+    //     delta_z -= z_pitch_comp;
+    // }
+
+    // if (leg == 0 || leg == 2) { 
+    //     delta_z -= z_roll_comp;
+    // } else {                   
+    //     delta_z += z_roll_comp;
+    // }
+
+    // // 更新期望高度
+    // nominal_pDes[leg](2) = _data->start_high - delta_z; 
+    
+    // nominal_pDes[leg](2)  = std::clamp(nominal_pDes[leg](2), -0.32, -0.24);
+    // }
 
     Eigen::Vector3d foot_pos = _data->kinematics->forwardKinematics(_data->leg_date[leg].q);
 
@@ -162,3 +163,4 @@ FSM_StateName State_Stand::checkTransition(){
 void State_Stand::onExit(){
     std::cout << "Stand Stand onExit" << std::endl;
 }
+

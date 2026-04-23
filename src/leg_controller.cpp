@@ -111,7 +111,6 @@ void LegController::sendJointTorques(Tangair_usb2can* can_ptr,
         // std::cout << "tau12:\n " << can_ptr->USB2CAN1_CAN_Bus_2.ID_3_motor_send.torque << std::endl;  
    }  
     
-    // can_ptr->USB2CAN0_CAN_Bus_1.ID_2_motor_send.torque = -1;
     // 测试力矩
     // can_ptr->USB2CAN0_CAN_Bus_1.ID_1_motor_send.torque = 1;
     // can_ptr->USB2CAN0_CAN_Bus_2.ID_1_motor_send.torque = -1;

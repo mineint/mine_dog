@@ -79,7 +79,7 @@ struct FSM_Data {
     RC_Date rc_data;
     Radar_Data radar_data;
     
-
+    bool stand_balance = false;     // 站立平衡开关
     
     double dt = 0.001;  // 控制周期
     Eigen::Vector3d last_touchdown_pos[4];

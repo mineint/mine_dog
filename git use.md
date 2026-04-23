@@ -48,6 +48,24 @@ git pull origin main
 # 7. 推送到远程
 git push origin main
 
+彻底放弃本地修改，完全以云端为准：
+git reset --hard HEAD
+git pull origin main
+
+
+
+如果你想保留你刚才写的代码，同时也想把服务器上的新代码拉下来。
+先暂存本地修改：
+code Bash
+git stash
+这会把你的代码暂时“藏起来”，让工作区恢复到干净状态。
+拉取最新代码：
+code Bash
+git pull origin main
+恢复你的修改：
+code Bash
+git stash pop
+
 三、处理合并冲突（当 git pull 提示冲突时）
 bash
 

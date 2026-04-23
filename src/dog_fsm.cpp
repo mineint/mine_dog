@@ -175,94 +175,72 @@ void FSM::update_imu(ImuReader *imu_ptr)
   }
 }
 
-void FSM::update(double dt)
+void FSM::remote_control()
 {
-  //  if (!_data || !_data.get() || !current_state_) {
-  //     std::cerr << "[FSM] update: invalid state or data\n";
-  //     return;
-  // }
-
-  _data.get()->dt = dt;
-
-  char rc = readerKey->readKey();
-
-  // 更新电机数据
-  update_motor(_data->can_ptr.get());
-
-  // 更新IMU数据
-  update_imu(_data->imu_ptr.get());
-
-  // 更新遥控数据
-  update_RC(_data->rc_ptr.get());
-
-  // 更新步态
-  _data.get()->gait_scheduler->update(dt);
-
-  // 执行当前状态的核心行为
-  current_state_->runState();
-
-  // if (_data->rc_data.S2 == 1)
-  // {
-  //   _data->command = "passive";
-  //   // std::cout << "切换到被动模式" << std::endl;
-  // }
-  // else if (_data->rc_data.S2 == 0)
-  // {
-  //   _data->command = "stand";
-  //   // std::cout << "切换到站立模式" << std::endl;
-  //   if (_data->rc_data.S3 != last_S3)
-  //   {
-  //     if (_data->rc_data.S3 == 0)
-  //     {
-  //       _data->last_high = _data->set_high;
-  //       _data->set_high = -0.18;
-  //       _data->timer = 1.0;
-  //       std::cout << "已趴下:down" << std::endl;
-  //     }
-  //     else if (_data->rc_data.S3 == 1)
-  //     {
-  //       _data->last_high = _data->set_high;
-  //       _data->set_high = -0.28;
-  //       _data->timer = 1.0;
-  //       std::cout << "已起立:up" << std::endl;
-  //     }
-  //     last_S3 = _data->rc_data.S3;
-  //   }
-  // }
-  // else if (_data->rc_data.S2 == 3)
-  // {
-
-  //   _data->command = "trot";
-  //   // std::cout << "切换到行走模式" << std::endl;
-  //   if (_data->rc_data.S3 != last_S3)
-  //   {
-  //     if (_data->rc_data.S3 == 3)
-  //     {
-  //       _data->lift_height = 0.05;
-  //       std::cout << "下台阶:" << std::endl;
-  //     }
-  //     else if (_data->rc_data.S3 == 0)
-  //     {
-  //       _data->lift_height = 0.10;
-  //       std::cout << "正常高度:" << std::endl;
-  //     }
-  //     else if (_data->rc_data.S3 == 1)
-  //     {
-  //       _data->lift_height = 0.15;
-  //       std::cout << "上台阶:" << std::endl;
-  //     }
-  //     last_S3 = _data->rc_data.S3;
-  //   }
-  // }
-  // else
-  // {
-
-  //   _data->command = "passive";
-  //   // std::cout << "切换到被动模式" << std::endl;
-  // }
-
-  if (rc != 0)
+  if (_data->rc_data.S2 == 1)
   {
+    _data->command = "passive";
+    // std::cout << "切换到被动模式" << std::endl;
+  }
+  else if (_data->rc_data.S2 == 0)
+  {
+    _data->command = "stand";
+    // std::cout << "切换到站立模式" << std::endl;
+    if (_data->rc_data.S3 != last_S3)
+    {
+      if (_data->rc_data.S3 == 0)
+      {
+        _data->last_high = _data->set_high;
+        _data->set_high = -0.18;
+        _data->timer = 1.0;
+        std::cout << "已趴下:down" << std::endl;
+      }
+      else if (_data->rc_data.S3 == 1)
+      {
+        _data->last_high = _data->set_high;
+        _data->set_high = -0.28;
+        _data->timer = 1.0;
+        std::cout << "已起立:up" << std::endl;
+      }
+      last_S3 = _data->rc_data.S3;
+    }
+  }
+  else if (_data->rc_data.S2 == 3)
+  {
+
+    _data->command = "trot";
+    // std::cout << "切换到行走模式" << std::endl;
+    if (_data->rc_data.S3 != last_S3)
+    {
+      if (_data->rc_data.S3 == 3)
+      {
+        _data->lift_height = 0.05;
+        std::cout << "下台阶:" << std::endl;
+      }
+      else if (_data->rc_data.S3 == 0)
+      {
+        _data->lift_height = 0.10;
+        std::cout << "正常高度:" << std::endl;
+      }
+      else if (_data->rc_data.S3 == 1)
+      {
+        _data->lift_height = 0.15;
+        std::cout << "上台阶:" << std::endl;
+      }
+      last_S3 = _data->rc_data.S3;
+    }
+  }
+  else
+  {
+
+    _data->command = "passive";
+    // std::cout << "切换到被动模式" << std::endl;
+  }
+
+}
+
+void FSM::key_control(char rc)
+{
     // 键盘按键到控制模式的映射
     switch (rc)
     {
@@ -409,8 +387,48 @@ void FSM::update(double dt)
       _data->lift_height = 0.08;
       std::cout << "下台阶:" << std::endl;
       break;
+
+    case '-':
+
+     _data->stand_balance = true;
     }
+}
+
+void FSM::update(double dt)
+{
+  //  if (!_data || !_data.get() || !current_state_) {
+  //     std::cerr << "[FSM] update: invalid state or data\n";
+  //     return;
+  // }
+
+  _data.get()->dt = dt;
+
+  char rc = readerKey->readKey();
+
+  // 更新电机数据
+  update_motor(_data->can_ptr.get());
+
+  // 更新IMU数据
+  update_imu(_data->imu_ptr.get());
+
+  // 更新遥控数据
+  update_RC(_data->rc_ptr.get());
+
+  // 更新步态
+  _data.get()->gait_scheduler->update(dt);
+
+  // 执行当前状态的核心行为
+  current_state_->runState();
+
+  // 遥控器控制
+  // remote_control();
+
+  if (rc != 0)
+  {
+    key_control(rc);
   }
+
+  
 
   // 检查切换
   FSM_StateName next_name = current_state_->checkTransition();
