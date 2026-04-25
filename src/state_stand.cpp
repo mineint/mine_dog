@@ -34,27 +34,43 @@ void State_Stand::runState(){
         _data->start_high = _data->last_high + smooth_step * (_data->set_high - _data->last_high);
     } 
     
+    // 通过2号桥
+    if (_data->bridge_swith) {
+        double target_y = 0.16;
+        const double step_size = 0.0002; 
+        _data->kinematics->approach(_data->start_wide, target_y, step_size);
+    }
+    else{
+        if(_data->start_wide != 0.096){
+           double target_y = 0.096;
+           const double step_size = 0.0002; 
+           _data->kinematics->approach(_data->start_wide, target_y, step_size); 
+        }
+    }
+
     // 平地的足端位置
     if (!_data->slope_swith){
-    nominal_pDes.fill(Eigen::Vector3d(0.0, 0.096, _data->start_high)); 
+    nominal_pDes.fill(Eigen::Vector3d(0.0, _data->start_wide, _data->start_high)); 
     }
-    // if (_data->tx_count % 100 == 0)
-    //         { 
-    //         std::cout << "start_high:" << _data->start_high << std::endl;
-    //         std::cout << "timer:" << _data->timer << std::endl;
-    //         }
+    if (_data->tx_count % 100 == 0)
+            { 
+            std::cout << "start_wide:" << _data->start_wide << std::endl;
+            // std::cout << "timer:" << _data->timer << std::endl;
+            }
 
-
+    
     for (int leg = 0; leg < 4; ++leg) {  
     
+    
+
     // 斜坡平衡
     if (_data->slope_swith) {
     
     nominal_pDes[leg](0) = 0;
-    nominal_pDes[leg](0) = 0.096;
+    nominal_pDes[leg](1) = _data->start_wide;
 
     double target_z = _data->start_high;
-    const double step_size = 0.0002; // 建议改为 speed * dt
+    const double step_size = 0.0002; 
 
     switch (_data->slope_state) {
         case 0:
@@ -77,15 +93,15 @@ void State_Stand::runState(){
 
     
 
-    if (_data->tx_count % 100 == 0)
-        { 
+    // if (_data->tx_count % 100 == 0)
+    //     { 
         // std::cout << "target_x" << leg + 1 << ":" <<  _data->target_x[leg] << std::endl;
         // std::cout << "target_y" << leg + 1 << ":" << _data->target_y[leg] << std::endl;
 
-        std::cout << leg + 1 << ":" << std::endl;
-        std::cout << "nominal_pDes: " <<  nominal_pDes[leg](2) << std::endl;
+        // std::cout << leg + 1 << ":" << std::endl;
+        // std::cout << "nominal_pDes: " <<  nominal_pDes[leg](2) << std::endl;
 
-        } 
+        // } 
 
     // VMC相关参数
     LegCommand cmd;

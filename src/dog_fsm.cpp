@@ -264,8 +264,7 @@ void FSM::key_control(char rc)
       _data->command = "jump";
       std::cout << "切换到跳跃模式" << std::endl;
       break;
-    case 'p':
-    case 'P':
+
     case ' ':
 
       _data->command = "passive";
@@ -415,6 +414,21 @@ void FSM::key_control(char rc)
      _data->slope_state = 0;
      
      break;
+
+    case 'q':
+    case 'Q':
+
+    // 过桥
+    _data->bridge_swith = true;
+    break;
+
+    case 'p':
+    case 'P':
+    
+    // 过桥
+    _data->bridge_swith = false;
+    break;
+
     }
 }
 

@@ -46,11 +46,12 @@ struct FSM_Data {
     double j_timer = 0;        // 跳跃计时
     std::string command;       // 模式转换标志
     double stand_time = 2.0;   // 高度变化时间
+    double start_wide = 0.096;
     double start_high = -0.12;
     double last_high = -0.12;
     double set_high = -0.28;
-    double slope_up_high = 0.10;   // 上斜坡变化高度
-    double slope_run_high = 0.08;   // 过斜坡变化高度
+    double slope_up_high = 0.08;  // 上斜坡变化高度
+    double slope_run_high = 0.06; // 过斜坡变化高度
     double jump_long = 0.00;   
     double trot_long = 0;
     double trot_long_r = 0;
@@ -58,7 +59,7 @@ struct FSM_Data {
     double trot_wide = 0;
     double trot_wide_r = 0;
     double trot_wide_l = 0;
-    double lift_height = 0.05;  // 抬腿高度
+    double lift_height = 0.08;  // 抬腿高度
 
     double rc_vx;
     double rc_vy;
@@ -84,22 +85,13 @@ struct FSM_Data {
     Radar_Data radar_data;
 
     bool slow_torques_swith = true;   // 力矩缓起开关
-    bool slope_swith = false; // 斜坡开关
+    bool slope_swith = false;   // 斜坡开关
+    bool bridge_swith = false;  // 2号桥开关
     int slope_state = 0; // 斜坡状态，0 = 正常, 1 = 横过， 2 = 上坡
 
     double dt = 0.001;  // 控制周期
     Eigen::Vector3d last_touchdown_pos[4];
     Eigen::Vector3d next_foot_target[4];
-
-     
-    // Eigen::Vector3d swing_kp{20, 24, 24};
-    // Eigen::Vector3d swing_kd{1, 1.2, 1.2};
-
-    // Eigen::Vector3d swing_kp{20, 24, 24};
-    // Eigen::Vector3d swing_kd{1, 1.2, 1.2};
-
-    Eigen::Vector3d swing_kp{10, 10, 10};
-    Eigen::Vector3d swing_kd{0.5, 0.5, 0.5};
 
     uint32_t tx_count = 0;
   

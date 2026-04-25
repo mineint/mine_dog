@@ -35,7 +35,7 @@ void State_Jump::runState(){
             jump_pDes = {0.00, 0.096, _data->start_high};
         }
         
-        // 阶段一飞行中（难点）
+        // 阶段一飞行中
         else if (_data->j_timer < (crouch_time + flight_time_1))
         {
             double flight_progress_1 = (_data->j_timer - crouch_time) / flight_time_1;
@@ -53,7 +53,7 @@ void State_Jump::runState(){
             
         }
 
-        // 阶段二飞行中（难点）
+        // 阶段二飞行中
         else if (_data->j_timer < (crouch_time + flight_time))
         {
             double flight_progress_2 = (_data->j_timer - crouch_time - flight_time + flight_time_2) / flight_time_2;

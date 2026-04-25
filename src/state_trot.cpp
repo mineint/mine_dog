@@ -52,19 +52,19 @@ void State_Trot::runState()
 
         // 左右腿分别管理
         Eigen::Vector3d starting_pDes_l(-_data->target_x[leg],
-                                        0.096 + _data->target_y[leg],
+                                        _data->start_wide + _data->target_y[leg],
                                         _data->target_z[leg]);
 
         Eigen::Vector3d starting_pDes_r(-_data->target_x[leg],
-                                        0.096 + _data->target_y[leg],
+                                        _data->start_wide + _data->target_y[leg],
                                         _data->target_z[leg]);
 
         Eigen::Vector3d destination_pDes_l(_data->target_x[leg],
-                                           0.096 - _data->target_y[leg],
+                                           _data->start_wide - _data->target_y[leg],
                                            _data->target_z[leg]);
 
         Eigen::Vector3d destination_pDes_r(_data->target_x[leg],
-                                           0.096 - _data->target_y[leg],
+                                           _data->start_wide - _data->target_y[leg],
                                            _data->target_z[leg]);
 
         if (leg == 0 || leg == 2)
